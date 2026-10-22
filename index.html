@@ -184,5 +184,95 @@
 })();
 </script>
 
+
+<section id="storeFormSection" style="margin:20px;padding:20px;background:white;border-radius:10px">
+  <h2>নতুন দোকান যোগ করুন</h2>
+  <form id="storeForm">
+    <label>দোকানের নাম</label><br>
+    <input id="storeName" required style="width:100%;padding:10px;margin:8px 0"><br>
+
+    <label>মালিকের নাম</label><br>
+    <input id="storeOwner" style="width:100%;padding:10px;margin:8px 0"><br>
+
+    <label>শুরুর বাকি (টাকা)</label><br>
+    <input id="storeBalance" type="number" min="0" step="0.01" value="0" required style="width:100%;padding:10px;margin:8px 0"><br>
+
+    <button type="submit" style="padding:10px 18px;background:#123b65;color:white;border:0;border-radius:6px">
+      দোকান সংরক্ষণ করুন
+    </button>
+  </form>
+  <p id="storeMessage" role="status"></p>
+  <h3>দোকানের তালিকা</h3>
+  <button id="loadStores" type="button">দোকানের তালিকা দেখুন</button>
+  <ul id="storeList"></ul>
+</section>
+  
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("storeForm");
+  const message = document.getElementById("storeMessage");
+  const list = document.getElementById("storeList");
+  const loadButton = document.getElementById("loadStores");
+
+  const supabaseUrl = "https://yprcaiyftfqvkibehxtb.supabase.co";
+  const supabaseKey = "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5";
+
+  const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function loadStores() {
+    list.replaceChildren();
+    message.textContent = "দোকানের তালিকা লোড হচ্ছে...";
+
+    const { data, error } = await db
+      .from("stores")
+      .select("store_name, owner_name, opening_balance")
+      .order("store_name");
+
+    if (error) {
+      message.textContent = "তালিকা লোড হয়নি: " + error.message;
+      return;
+    }
+
+    data.forEach(function (store) {
+      const item = document.createElement("li");
+      item.textContent =
+        store.store_name + " | মালিক: " +
+        (store.owner_name || "উল্লেখ নেই") +
+        " | শুরুর বাকি: ৳" +
+        (store.opening_balance ?? 0);
+      list.appendChild(item);
+    });
+
+    message.textContent = "মোট দোকান: " + data.length;
+  }
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    message.textContent = "দোকান সংরক্ষণ হচ্ছে...";
+
+    const store = {
+      store_name: document.getElementById("storeName").value.trim(),
+      owner_name: document.getElementById("storeOwner").value.trim() || null,
+      opening_balance: Number(document.getElementById("storeBalance").value),
+      is_active: true
+    };
+
+    const { error } = await db.from("stores").insert(store);
+
+    if (error) {
+      message.textContent = "সংরক্ষণ হয়নি: " + error.message;
+      return;
+    }
+
+    message.textContent = "দোকান সফলভাবে সংরক্ষিত হয়েছে।";
+    form.reset();
+    document.getElementById("storeBalance").value = "0";
+    await loadStores();
+  });
+
+  loadButton.addEventListener("click", loadStores);
+});
+</script>
+
 </body>
 </html>
