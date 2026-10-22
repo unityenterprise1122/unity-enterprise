@@ -147,5 +147,42 @@
       });
     });
   </script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function () {
+  const box = document.createElement("div");
+  box.style.cssText =
+    "margin:12px;padding:12px;border-radius:8px;background:#fff3cd;color:#333;font-family:Arial,sans-serif";
+  box.textContent = "Supabase সংযোগ পরীক্ষা হচ্ছে...";
+  document.body.prepend(box);
+
+  try {
+    const client = window.supabase.createClient(
+      "https://yprcaiyftfqvkibehxtb.supabase.co",
+      "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5"
+    );
+
+    const { error } = await client
+      .from("stores")
+      .select("id")
+      .limit(1);
+
+    if (error) {
+      box.textContent =
+        "ডাটাবেস পরীক্ষা ব্যর্থ: " + error.message;
+      box.style.background = "#f8d7da";
+    } else {
+      box.textContent =
+        "Supabase সংযোগ সফল! ডাটাবেসে যোগাযোগ করা যাচ্ছে।";
+      box.style.background = "#d1e7dd";
+    }
+  } catch (e) {
+    box.textContent = "সংযোগে সমস্যা হয়েছে। পেইজ ও কোড পরীক্ষা করুন।";
+    box.style.background = "#f8d7da";
+  }
+})();
+</script>
+
 </body>
 </html>
