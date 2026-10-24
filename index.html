@@ -274,5 +274,112 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<section id="storeFormSection" style="display:none;margin:20px;padding:20px;background:white;border-radius:10px">
+  <h3>নতুন দোকান যোগ করুন</h3>
+
+  <form id="storeForm">
+    <label>দোকানের নাম</label>
+    <input id="storeName" required style="display:block;width:100%;padding:10px;margin:8px 0">
+
+    <label>মালিকের নাম</label>
+    <input id="storeOwner" style="display:block;width:100%;padding:10px;margin:8px 0">
+
+    <label>শুরুর বাকি (টাকা)</label>
+    <input id="storeBalance" type="number" min="0" step="0.01" value="0" required style="display:block;width:100%;padding:10px;margin:8px 0">
+
+    <button type="submit" style="padding:10px;background:#123b65;color:white;border:0;border-radius:6px">দোকান সংরক্ষণ করুন</button>
+  </form>
+
+  <p id="storeMessage"></p>
+  <h3>দোকানের তালিকা</h3>
+  <button id="loadStores" type="button">দোকানের তালিকা দেখুন</button>
+  <ul id="storeList"></ul>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const section = document.getElementById("storeFormSection");
+  const content = document.getElementById("pageContent");
+  const form = document.getElementById("storeForm");
+  const message = document.getElementById("storeMessage");
+  const list = document.getElementById("storeList");
+  const loadButton = document.getElementById("loadStores");
+
+  const db = window.supabase.createClient(
+    "https://yprcaiyftfqvkibehxtb.supabase.co",
+    "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5"
+  );
+
+  async function loadStores() {
+    list.replaceChildren();
+    message.textContent = "দোকানের তালিকা লোড হচ্ছে...";
+
+    const { data, error } = await db
+      .from("stores")
+      .select("store_name, owner_name, opening_balance")
+      .order("store_name");
+
+    if (error) {
+      message.textContent = "তালিকা লোড হয়নি: " + error.message;
+      return;
+    }
+
+    data.forEach(function (store) {
+      const item = document.createElement("li");
+      item.textContent =
+        store.store_name +
+        " | মালিক: " + (store.owner_name || "উল্লেখ নেই") +
+        " | শুরুর বাকি: ৳" + (store.opening_balance ?? 0);
+      list.appendChild(item);
+    });
+
+    message.textContent = "মোট দোকান: " + data.length;
+  }
+
+  document.getElementById("menu").addEventListener("click", function (event) {
+    const button = event.target.closest("button[data-page]");
+    if (!button || button.dataset.page !== "stores") return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    document.querySelectorAll("#menu button").forEach(function (item) {
+      item.classList.toggle("active", item === button);
+    });
+
+    document.getElementById("pageTitle").textContent = "দোকান";
+    content.replaceChildren(section);
+    section.style.display = "block";
+    loadStores();
+  }, true);
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    message.textContent = "দোকান সংরক্ষণ হচ্ছে...";
+
+    const store = {
+      store_name: document.getElementById("storeName").value.trim(),
+      owner_name: document.getElementById("storeOwner").value.trim() || null,
+      opening_balance: Number(document.getElementById("storeBalance").value),
+      is_active: true
+    };
+
+    const { error } = await db.from("stores").insert(store);
+
+    if (error) {
+      message.textContent = "সংরক্ষণ হয়নি: " + error.message;
+      return;
+    }
+
+    form.reset();
+    document.getElementById("storeBalance").value = "0";
+    message.textContent = "দোকান সফলভাবে সংরক্ষিত হয়েছে।";
+    await loadStores();
+  });
+
+  loadButton.addEventListener("click", loadStores);
+});
+</script>
+
 </body>
 </html>
