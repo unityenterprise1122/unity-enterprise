@@ -296,6 +296,10 @@
 
             <label for="storeOwner">মালিকের নাম</label>
             <input id="storeOwner" maxlength="150">
+            
+<label for="storeAddress">দোকানের ঠিকানা</label>
+<textarea id="storeAddress" maxlength="500" rows="3" placeholder="দোকানের সম্পূর্ণ ঠিকানা লিখুন"></textarea>
+
 
             <label for="storeBalance">শুরুর বাকি (টাকা)</label>
             <input id="storeBalance" type="number" min="0" step="0.01" value="0" required>
@@ -331,59 +335,62 @@
       loadStores();
     }
 
-    async function saveStore(event) {
-      event.preventDefault();
+ 
+async function saveStore(event) {
+  event.preventDefault();
 
-      const form = event.currentTarget;
-      const message = document.getElementById("storeMessage");
-      const button = form.querySelector('button[type="submit"]');
+  const form = event.currentTarget;
+  const message = document.getElementById("storeMessage");
+  const button = form.querySelector('button[type="submit"]');
 
-      if (!db) {
-        showMessage(message, "ডেটাবেস সংযুক্ত নয়। সংযোগ পরীক্ষা করুন।", "error");
-        return;
-      }
+  if (!db) {
+    showMessage(message, "ডেটাবেস সংযুক্ত নয়। সংযোগ পরীক্ষা করুন।", "error");
+    return;
+  }
 
-      const storeName = document.getElementById("storeName").value.trim();
-      const ownerName = document.getElementById("storeOwner").value.trim();
-      const balance = Number(document.getElementById("storeBalance").value);
+  const storeName = document.getElementById("storeName").value.trim();
+  const ownerName = document.getElementById("storeOwner").value.trim();
+  const address = document.getElementById("storeAddress").value.trim();
+  const balance = Number(document.getElementById("storeBalance").value);
 
-      if (!storeName) {
-        showMessage(message, "দোকানের নাম লিখুন।", "error");
-        return;
-      }
+  if (!storeName) {
+    showMessage(message, "দোকানের নাম লিখুন।", "error");
+    return;
+  }
 
-      if (!Number.isFinite(balance) || balance < 0) {
-        showMessage(message, "শুরুর বাকি সঠিকভাবে লিখুন।", "error");
-        return;
-      }
+  if (!Number.isFinite(balance) || balance < 0) {
+    showMessage(message, "শুরুর বাকি সঠিকভাবে লিখুন।", "error");
+    return;
+  }
 
-      button.disabled = true;
-      showMessage(message, "দোকান সংরক্ষণ হচ্ছে...");
+  button.disabled = true;
+  showMessage(message, "দোকান সংরক্ষণ হচ্ছে...");
 
-      try {
-        const store = {
-          store_name: storeName,
-          owner_name: ownerName || null,
-          opening_balance: balance,
-          is_active: true
-        };
+  try {
+    const store = {
+      store_name: storeName,
+      owner_name: ownerName || null,
+      address: address || null,
+      opening_balance: balance,
+      is_active: true
+    };
 
-        const { error } = await db.from("stores").insert(store);
+    const { error } = await db.from("stores").insert(store);
 
-        if (error) throw error;
+    if (error) throw error;
 
-        form.reset();
-        document.getElementById("storeBalance").value = "0";
-        showMessage(message, "দোকান সফলভাবে সংরক্ষিত হয়েছে।", "success");
-        await loadStores();
-        await loadStoreCount();
-      } catch (error) {
-        console.error("Save store error:", error);
-        showMessage(message, "সংরক্ষণ হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
-      } finally {
-        button.disabled = false;
-      }
-    }
+    form.reset();
+    document.getElementById("storeBalance").value = "0";
+    showMessage(message, "দোকান সফলভাবে সংরক্ষিত হয়েছে।", "success");
+    await loadStores();
+    await loadStoreCount();
+  } catch (error) {
+    console.error("Save store error:", error);
+    showMessage(message, "সংরক্ষণ হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
+  } finally {
+    button.disabled = false;
+  }
+}
 
     async function loadStores() {
       const list = document.getElementById("storeList");
