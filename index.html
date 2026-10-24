@@ -414,7 +414,7 @@ async function loadStores() {
   try {
     const { data, error } = await db
       .from("stores")
-      .select("store_name, owner_name, address, opening_balance")
+      .select("id, store_name, owner_name, address, opening_balance")
       .order("store_name", { ascending: true });
 
     if (error) throw error;
