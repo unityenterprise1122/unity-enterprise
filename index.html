@@ -3,88 +3,197 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unity Enterprise | হিসাব সফটওয়্যার</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unity Enterprise হিসাব সফটওয়্যার</title>
   <style>
+    :root {
+      --navy: #123b65;
+      --blue: #1769aa;
+      --bg: #f2f5f9;
+      --white: #ffffff;
+      --text: #243447;
+      --muted: #64748b;
+      --border: #dce4ee;
+      --green: #d1e7dd;
+      --red: #f8d7da;
+    }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      color: #172033;
+      font-family: Arial, "Noto Sans Bengali", sans-serif;
+      color: var(--text);
+      background: var(--bg);
     }
+
     header {
-      background: #123b65;
+      background: var(--navy);
       color: white;
-      padding: 18px;
+      padding: 18px 22px;
     }
-    header h2 { margin: 0 0 6px; }
-    header p { margin: 0; font-size: 13px; }
-    .layout { display: flex; min-height: calc(100vh - 80px); }
+
+    header h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      opacity: .9;
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: calc(100vh - 85px);
+    }
+
     nav {
-      width: 220px;
       background: #fff;
-      padding: 12px;
-      border-right: 1px solid #ddd;
+      padding: 14px;
+      border-right: 1px solid var(--border);
     }
+
     nav button {
-      display: block;
       width: 100%;
-      border: 0;
-      background: white;
+      display: block;
       text-align: left;
       padding: 12px;
-      margin-bottom: 4px;
-      border-radius: 6px;
+      margin-bottom: 6px;
+      background: white;
+      border: 1px solid transparent;
+      border-radius: 7px;
       cursor: pointer;
       font-size: 15px;
+      color: var(--text);
     }
-    nav button:hover, nav button.active {
-      background: #dbeafe;
-      color: #123b65;
+
+    nav button:hover,
+    nav button.active {
+      background: #e8f1fb;
+      border-color: #c7d9ef;
+      color: var(--navy);
+      font-weight: bold;
     }
-    main { padding: 22px; flex: 1; min-width: 0; }
+
+    main { padding: 24px; min-width: 0; }
+
+    h2 { margin-top: 0; }
+
+    .panel, .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 5px #00000008;
+    }
+
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 14px;
-      margin: 18px 0;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
     }
-    .card, .panel {
+
+    .card p { color: var(--muted); margin: 0 0 10px; }
+    .card strong { font-size: 24px; }
+
+    label {
+      display: block;
+      margin: 13px 0 5px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font: inherit;
       background: white;
-      padding: 18px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px #0000000a;
     }
-    .card p { margin: 0 0 12px; color: #526078; }
-    .card strong { font-size: 23px; }
-    .panel { margin-top: 16px; }
-    .muted { color: #64748b; line-height: 1.7; }
-    .notice {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      padding: 12px;
-      border-radius: 8px;
-      line-height: 1.7;
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid #b8d7f5;
+      border-color: var(--blue);
     }
-    @media (max-width: 650px) {
-      .layout { display: block; }
+
+    .btn {
+      display: inline-block;
+      border: 0;
+      border-radius: 6px;
+      background: var(--navy);
+      color: white;
+      padding: 11px 16px;
+      margin: 12px 6px 0 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .btn:hover { background: var(--blue); }
+    .btn.secondary { background: #526579; }
+
+    .message {
+      padding: 10px;
+      border-radius: 6px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .message:empty { display: none; }
+    .message.success { background: var(--green); }
+    .message.error { background: var(--red); }
+    .muted { color: var(--muted); }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      min-width: 500px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 11px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th { background: #edf3f9; }
+
+    .status {
+      margin-top: 12px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
       nav {
-        width: 100%;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
         border-right: 0;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid var(--border);
       }
-      nav button { font-size: 13px; padding: 10px 6px; }
+      nav button { margin: 0; font-size: 13px; }
       main { padding: 14px; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      header h1 { font-size: 20px; }
     }
   </style>
 </head>
+
 <body>
   <header>
-    <h2>Unity Enterprise</h2>
-    <p>আইসক্রিম ডিলারশিপ · হিসাব ও স্টক ব্যবস্থাপনা</p>
+    <h1>Unity Enterprise</h1>
+    <p>আইসক্রিম ডিলারশিপ হিসাব ব্যবস্থাপনা</p>
   </header>
 
   <div class="layout">
@@ -93,188 +202,323 @@
       <button data-page="stores">🏪 দোকান</button>
       <button data-page="products">🍦 পণ্য</button>
       <button data-page="stock">📦 গোডাউন স্টক</button>
-      <button data-page="deliveries">🚚 ডেলিভারি</button>
+      <button data-page="vehicles">🚚 গাড়ি</button>
+      <button data-page="deliveries">🧾 ডেলিভারি</button>
       <button data-page="payments">💵 টাকা আদায়</button>
-      <button data-page="expenses">🧾 খরচ</button>
+      <button data-page="expenses">💳 খরচ</button>
       <button data-page="partners">🤝 অংশীদার</button>
       <button data-page="reports">📊 রিপোর্ট</button>
     </nav>
 
     <main>
       <h2 id="pageTitle">ড্যাশবোর্ড</h2>
-      
-
-      <div id="pageContent">
-        <div class="cards">
-          <div class="card"><p>মোট দোকান</p><strong>—</strong></div>
-          <div class="card"><p>পণ্যের ধরন</p><strong>—</strong></div>
-          <div class="card"><p>আজকের বিক্রি</p><strong>৳ —</strong></div>
-          <div class="card"><p>দোকানে মোট বাকি</p><strong>৳ —</strong></div>
-        </div>
-        <div class="notice">
-          <strong>প্রস্তুতির অবস্থা</strong><br>
-          এটি সফটওয়্যারের প্রাথমিক ডিজাইন। ডেটাবেস সংযোগ না হওয়া পর্যন্ত
-          এখানে বাস্তব হিসাব দেখানো হবে না।
-        </div>
+      <div id="pageContent"></div>
+      <div id="connectionStatus" class="status">
+        ডেটাবেস সংযোগ পরীক্ষা হচ্ছে...
       </div>
     </main>
   </div>
 
-  
-<script>
-  const pages = {
-    home: ["ড্যাশবোর্ড", "ব্যবসার সার্বিক হিসাব এখানে দেখা যাবে।"],
-    stores: ["দোকান", "দোকানের নাম, মালিক, যোগাযোগ ও বাকি হিসাব।"],
-    products: ["পণ্য", "আইসক্রিমের নাম, ফ্লেভার, কার্টন ও মূল্য।"],
-    stock: ["গোডাউন স্টক", "প্রারম্ভিক স্টক, ক্রয়, ফেরত ও নষ্ট পণ্যের হিসাব।"],
-    deliveries: ["ডেলিভারি", "দোকান, গাড়ি, পণ্য ও ডেলিভারির হিসাব।"],
-    payments: ["টাকা আদায়", "ডেলিভারির সময় ও পরে আদায় করা টাকার হিসাব।"],
-    expenses: ["খরচ", "গাড়ির তেল, মেরামত ও অন্যান্য খরচ।"],
-    partners: ["অংশীদার", "দুই অংশীদারের মূলধন, জমা ও উত্তোলন।"],
-    reports: ["রিপোর্ট", "দৈনিক বিক্রি, বাকি, গাড়ি ও লাভ-ক্ষতির রিপোর্ট।"]
-  };
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (() => {
+    "use strict";
 
-  document.querySelectorAll("#menu button").forEach(button => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll("#menu button").forEach(item =>
-        item.classList.remove("active")
-      );
-      button.classList.add("active");
+    const SUPABASE_URL = "https://yprcaiyftfqvkibehxtb.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5";
 
-      const page = pages[button.dataset.page];
-      if (!page) return;
+    const title = document.getElementById("pageTitle");
+    const content = document.getElementById("pageContent");
+    const connectionStatus = document.getElementById("connectionStatus");
+    const menu = document.getElementById("menu");
 
-      document.getElementById("pageTitle").textContent = page[0];
+    const pages = {
+      home: ["ড্যাশবোর্ড", "ব্যবসার সার্বিক হিসাব"],
+      stores: ["দোকান", "দোকান যোগ করুন এবং দোকানের তালিকা দেখুন"],
+      products: ["পণ্য", "পণ্যের নাম, ফ্লেভার, কার্টন ও মূল্য"],
+      stock: ["গোডাউন স্টক", "প্রারম্ভিক স্টক, ক্রয়, ফেরত ও নষ্ট পণ্যের হিসাব"],
+      vehicles: ["গাড়ি", "ডেলিভারি গাড়ির তথ্য"],
+      deliveries: ["ডেলিভারি", "দোকান, গাড়ি ও পণ্য সরবরাহের হিসাব"],
+      payments: ["টাকা আদায়", "দোকানের কাছ থেকে আদায় করা টাকা"],
+      expenses: ["খরচ", "গাড়ির তেল, মেরামত ও অন্যান্য খরচ"],
+      partners: ["অংশীদার", "মূলধন, জমা ও উত্তোলনের হিসাব"],
+      reports: ["রিপোর্ট", "দৈনিক বিক্রি, বাকি ও লাভ-ক্ষতির রিপোর্ট"]
+    };
 
-      const content = document.getElementById("pageContent");
-      const storeSection = document.getElementById("storeFormSection");
+    let db = null;
+    let currentPage = "home";
 
-      if (button.dataset.page === "stores" && storeSection) {
-        content.replaceChildren(storeSection);
-        storeSection.style.display = "block";
+    function showMessage(element, message, type = "") {
+      element.textContent = message;
+      element.className = "message" + (type ? " " + type : "");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString("en-BD", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function renderHome() {
+      content.innerHTML = `
+        <div class="cards">
+          <div class="card"><p>মোট দোকান</p><strong id="totalStores">—</strong></div>
+          <div class="card"><p>পণ্যের ধরন</p><strong>—</strong></div>
+          <div class="card"><p>আজকের বিক্রি</p><strong>৳ —</strong></div>
+          <div class="card"><p>দোকানে মোট বাকি</p><strong>৳ —</strong></div>
+        </div>
+        <div class="panel">
+          <h3>স্বাগতম</h3>
+          <p>Unity Enterprise হিসাব ব্যবস্থাপনায় স্বাগতম।</p>
+          <p class="muted">বাস্তব বিক্রি, স্টক ও বাকি দেখানোর জন্য সংশ্লিষ্ট মডিউল ও হিসাবের নিয়ম সম্পূর্ণ করতে হবে।</p>
+        </div>`;
+      loadStoreCount();
+    }
+
+    function renderStores() {
+      content.innerHTML = `
+        <section class="panel">
+          <h3>নতুন দোকান যোগ করুন</h3>
+          <form id="storeForm">
+            <label for="storeName">দোকানের নাম *</label>
+            <input id="storeName" required maxlength="150" autocomplete="organization">
+
+            <label for="storeOwner">মালিকের নাম</label>
+            <input id="storeOwner" maxlength="150">
+
+            <label for="storeBalance">শুরুর বাকি (টাকা)</label>
+            <input id="storeBalance" type="number" min="0" step="0.01" value="0" required>
+
+            <button class="btn" type="submit">দোকান সংরক্ষণ করুন</button>
+            <button class="btn secondary" type="button" id="refreshStores">তালিকা রিফ্রেশ করুন</button>
+          </form>
+          <div id="storeMessage" class="message" role="status"></div>
+        </section>
+
+        <section class="panel">
+          <h3>দোকানের তালিকা</h3>
+          <p class="muted">ডেটাবেসে সংরক্ষিত দোকানগুলো এখানে দেখা যাবে।</p>
+          <div id="storeListMessage" class="message" role="status"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>দোকানের নাম</th>
+                  <th>মালিক</th>
+                  <th>শুরুর বাকি</th>
+                </tr>
+              </thead>
+              <tbody id="storeList">
+                <tr><td colspan="3">তালিকা লোড হচ্ছে...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>`;
+
+      document.getElementById("storeForm").addEventListener("submit", saveStore);
+      document.getElementById("refreshStores").addEventListener("click", loadStores);
+      loadStores();
+    }
+
+    async function saveStore(event) {
+      event.preventDefault();
+
+      const form = event.currentTarget;
+      const message = document.getElementById("storeMessage");
+      const button = form.querySelector('button[type="submit"]');
+
+      if (!db) {
+        showMessage(message, "ডেটাবেস সংযুক্ত নয়। সংযোগ পরীক্ষা করুন।", "error");
         return;
       }
 
-      content.innerHTML =
-        '<div class="panel"><h3>' + page[0] +
-        '</h3><p class="muted">' + page[1] +
-        '</p><p>এই অংশের কাজ পরের ধাপে চালু করা হবে।</p></div>';
-    });
-  });
-</script>
+      const storeName = document.getElementById("storeName").value.trim();
+      const ownerName = document.getElementById("storeOwner").value.trim();
+      const balance = Number(document.getElementById("storeBalance").value);
 
+      if (!storeName) {
+        showMessage(message, "দোকানের নাম লিখুন।", "error");
+        return;
+      }
 
+      if (!Number.isFinite(balance) || balance < 0) {
+        showMessage(message, "শুরুর বাকি সঠিকভাবে লিখুন।", "error");
+        return;
+      }
 
-<section id="storeFormSection" style="margin:20px;padding:20px;background:white;border-radius:10px">
-  <h2>নতুন দোকান যোগ করুন</h2>
-  <form id="storeForm">
-    <label>দোকানের নাম</label><br>
-    <input id="storeName" required style="width:100%;padding:10px;margin:8px 0"><br>
+      button.disabled = true;
+      showMessage(message, "দোকান সংরক্ষণ হচ্ছে...");
 
-    <label>মালিকের নাম</label><br>
-    <input id="storeOwner" style="width:100%;padding:10px;margin:8px 0"><br>
+      try {
+        const store = {
+          store_name: storeName,
+          owner_name: ownerName || null,
+          opening_balance: balance,
+          is_active: true
+        };
 
-    <label>শুরুর বাকি (টাকা)</label><br>
-    <input id="storeBalance" type="number" min="0" step="0.01" value="0" required style="width:100%;padding:10px;margin:8px 0"><br>
+        const { error } = await db.from("stores").insert(store);
 
-    <button type="submit" style="padding:10px 18px;background:#123b65;color:white;border:0;border-radius:6px">
-      দোকান সংরক্ষণ করুন
-    </button>
-  </form>
-  <p id="storeMessage" role="status"></p>
-  <h3>দোকানের তালিকা</h3>
-  <button id="loadStores" type="button">দোকানের তালিকা দেখুন</button>
-  <ul id="storeList"></ul>
-</section>
-  
-<script>
+        if (error) throw error;
 
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const section = document.getElementById("storeFormSection");
-  const content = document.getElementById("pageContent");
-  const form = document.getElementById("storeForm");
-  const message = document.getElementById("storeMessage");
-  const list = document.getElementById("storeList");
-  const loadButton = document.getElementById("loadStores");
-
-  const db = window.supabase.createClient(
-    "https://yprcaiyftfqvkibehxtb.supabase.co",
-    "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5"
-  );
-
-  async function loadStores() {
-    list.replaceChildren();
-    message.textContent = "দোকানের তালিকা লোড হচ্ছে...";
-
-    const { data, error } = await db
-      .from("stores")
-      .select("store_name, owner_name, opening_balance")
-      .order("store_name");
-
-    if (error) {
-      message.textContent = "তালিকা লোড হয়নি: " + error.message;
-      return;
+        form.reset();
+        document.getElementById("storeBalance").value = "0";
+        showMessage(message, "দোকান সফলভাবে সংরক্ষিত হয়েছে।", "success");
+        await loadStores();
+        await loadStoreCount();
+      } catch (error) {
+        console.error("Save store error:", error);
+        showMessage(message, "সংরক্ষণ হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
+      } finally {
+        button.disabled = false;
+      }
     }
 
-    data.forEach(function (store) {
-      const item = document.createElement("li");
-      item.textContent =
-        store.store_name +
-        " | মালিক: " + (store.owner_name || "উল্লেখ নেই") +
-        " | শুরুর বাকি: ৳" + (store.opening_balance ?? 0);
-      list.appendChild(item);
-    });
+    async function loadStores() {
+      const list = document.getElementById("storeList");
+      const message = document.getElementById("storeListMessage");
+      if (!list || !message) return;
 
-    message.textContent = "মোট দোকান: " + data.length;
-  }
+      list.replaceChildren();
 
-  document.getElementById("menu").addEventListener("click", function (event) {
-    const button = event.target.closest("button[data-page]");
-    if (!button || button.dataset.page !== "stores") return;
+      if (!db) {
+        list.innerHTML = '<tr><td colspan="3">ডেটাবেস সংযুক্ত নয়।</td></tr>';
+        showMessage(message, "Supabase সংযোগ তৈরি হয়নি।", "error");
+        return;
+      }
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
+      showMessage(message, "দোকানের তালিকা লোড হচ্ছে...");
 
-    document.querySelectorAll("#menu button").forEach(function (item) {
-      item.classList.toggle("active", item === button);
-    });
+      try {
+        const { data, error } = await db
+          .from("stores")
+          .select("store_name, owner_name, opening_balance")
+          .order("store_name", { ascending: true });
 
-    document.getElementById("pageTitle").textContent = "দোকান";
-    content.replaceChildren(section);
-    section.style.display = "block";
-    loadStores();
-  }, true);
+        if (error) throw error;
 
-  form.addEventListener("submit", async function (event) {
-    event.preventDefault();
-    message.textContent = "দোকান সংরক্ষণ হচ্ছে...";
+        if (!data || data.length === 0) {
+          list.innerHTML = '<tr><td colspan="3">এখনও কোনো দোকান যোগ করা হয়নি।</td></tr>';
+          showMessage(message, "মোট দোকান: 0", "success");
+          return;
+        }
 
-    const store = {
-      store_name: document.getElementById("storeName").value.trim(),
-      owner_name: document.getElementById("storeOwner").value.trim() || null,
-      opening_balance: Number(document.getElementById("storeBalance").value),
-      is_active: true
-    };
+        data.forEach(store => {
+          const row = document.createElement("tr");
 
-    const { error } = await db.from("stores").insert(store);
+          const nameCell = document.createElement("td");
+          nameCell.textContent = store.store_name || "";
 
-    if (error) {
-      message.textContent = "সংরক্ষণ হয়নি: " + error.message;
-      return;
+          const ownerCell = document.createElement("td");
+          ownerCell.textContent = store.owner_name || "উল্লেখ নেই";
+
+          const balanceCell = document.createElement("td");
+          balanceCell.textContent = "৳ " + money(store.opening_balance);
+
+          row.append(nameCell, ownerCell, balanceCell);
+          list.appendChild(row);
+        });
+
+        showMessage(message, "মোট দোকান: " + data.length, "success");
+      } catch (error) {
+        console.error("Load stores error:", error);
+        list.innerHTML = '<tr><td colspan="3">তালিকা আনা যায়নি। নিচের বার্তাটি দেখুন।</td></tr>';
+        showMessage(message, "তালিকা লোড হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
+      }
     }
 
-    form.reset();
-    document.getElementById("storeBalance").value = "0";
-    message.textContent = "দোকান সফলভাবে সংরক্ষিত হয়েছে।";
-    await loadStores();
-  });
+    async function loadStoreCount() {
+      const total = document.getElementById("totalStores");
+      if (!total || !db) return;
 
-  loadButton.addEventListener("click", loadStores);
-});
-</script>
+      try {
+        const { count, error } = await db
+          .from("stores")
+          .select("*", { count: "exact", head: true });
 
+        if (error) throw error;
+        total.textContent = count ?? 0;
+      } catch (error) {
+        console.error("Store count error:", error);
+        total.textContent = "—";
+      }
+    }
+
+    function renderPlaceholder(pageKey) {
+      const page = pages[pageKey];
+      content.innerHTML = `
+        <section class="panel">
+          <h3>${escapeHtml(page[0])}</h3>
+          <p>${escapeHtml(page[1])}</p>
+          <p class="muted">এই মডিউলের পূর্ণ ফর্ম, ডেটাবেস সংরক্ষণ এবং রিপোর্টিং লজিক এখনও যোগ করা হয়নি।</p>
+        </section>`;
+    }
+
+    function navigate(pageKey) {
+      if (!pages[pageKey]) return;
+
+      currentPage = pageKey;
+      title.textContent = pages[pageKey][0];
+
+      menu.querySelectorAll("button[data-page]").forEach(button => {
+        const active = button.dataset.page === pageKey;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-current", active ? "page" : "false");
+      });
+
+      if (pageKey === "home") renderHome();
+      else if (pageKey === "stores") renderStores();
+      else renderPlaceholder(pageKey);
+    }
+
+    menu.addEventListener("click", event => {
+      const button = event.target.closest("button[data-page]");
+      if (!button) return;
+      navigate(button.dataset.page);
+    });
+
+    async function start() {
+      if (!window.supabase || !window.supabase.createClient) {
+        connectionStatus.textContent = "Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।";
+        connectionStatus.className = "status message error";
+        navigate("home");
+        return;
+      }
+
+      try {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const { error } = await db.from("stores").select("id").limit(1);
+
+        if (error) {
+          connectionStatus.textContent = "ডেটাবেস সংযোগে সমস্যা: " + error.message;
+          connectionStatus.className = "status message error";
+        } else {
+          connectionStatus.textContent = "Supabase সংযোগ সফল।";
+          connectionStatus.className = "status message success";
+        }
+      } catch (error) {
+        console.error("Supabase connection error:", error);
+        connectionStatus.textContent = "সংযোগে সমস্যা হয়েছে: " + (error.message || "অজানা সমস্যা");
+        connectionStatus.className = "status message error";
+      }
+
+      navigate("home");
+    }
+
+    start();
+  })();
+  </script>
 </body>
 </html>
