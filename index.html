@@ -341,6 +341,34 @@
 
  
 
+function editStore(store) {
+  document.getElementById("storeName").value = store.store_name || "";
+  document.getElementById("storeOwner").value = store.owner_name || "";
+  document.getElementById("storeAddress").value = store.address || "";
+  document.getElementById("storeBalance").value = store.opening_balance ?? 0;
+
+  let hiddenId = document.getElementById("editingStoreId");
+
+  if (!hiddenId) {
+    hiddenId = document.createElement("input");
+    hiddenId.type = "hidden";
+    hiddenId.id = "editingStoreId";
+    document.getElementById("storeForm").appendChild(hiddenId);
+  }
+
+  hiddenId.value = store.id;
+
+  const button = document.querySelector('#storeForm button[type="submit"]');
+  if (button) {
+    button.textContent = "পরিবর্তন সংরক্ষণ করুন";
+  }
+
+  document.getElementById("storeForm").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
 async function saveStore(event) {
   event.preventDefault();
 
