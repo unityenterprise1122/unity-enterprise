@@ -323,6 +323,7 @@
     <th>মালিক</th>
     <th>দোকানের ঠিকানা</th>
     <th>শুরুর বাকি</th>
+    <th>কাজ</th>
   </tr>
 </thead>
 
@@ -440,7 +441,22 @@ async function loadStores() {
       const balanceCell = document.createElement("td");
       balanceCell.textContent = "৳ " + money(store.opening_balance);
 
-      row.append(nameCell, ownerCell, addressCell, balanceCell);
+      
+const actionCell = document.createElement("td");
+
+const editButton = document.createElement("button");
+editButton.type = "button";
+editButton.className = "btn";
+editButton.textContent = "সম্পাদনা";
+
+editButton.addEventListener("click", () => {
+  editStore(store);
+});
+
+actionCell.appendChild(editButton);
+
+row.append(nameCell, ownerCell, addressCell, balanceCell, actionCell);
+
       list.appendChild(row);
     });
 
