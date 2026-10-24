@@ -340,6 +340,7 @@
     }
 
  
+
 async function saveStore(event) {
   event.preventDefault();
 
@@ -351,6 +352,85 @@ async function saveStore(event) {
     showMessage(message, "ডেটাবেস সংযুক্ত নয়। সংযোগ পরীক্ষা করুন।", "error");
     return;
   }
+
+  const storeName = document.getElementById("storeName").value.trim();
+  const ownerName = document.getElementById("storeOwner").value.trim();
+  const address = document.getElementById("storeAddress").value.trim();
+  const balance = Number(document.getElementById("storeBalance").value);
+  const editingId = document.getElementById("editingStoreId")?.value;
+
+  if (!storeName) {
+    showMessage(message, "দোকানের নাম লিখুন।", "error");
+    return;
+  }
+
+  if (!Number.isFinite(balance) || balance < 0) {
+    showMessage(message, "শুরুর বাকি সঠিকভাবে লিখুন।", "error");
+    return;
+  }
+
+  const store = {
+    store_name: storeName,
+    owner_name: ownerName || null,
+    address: address || null,
+    opening_balance: balance
+  };
+
+  button.disabled = true;
+
+  try {
+    let result;
+
+    if (editingId) {
+      result = await db
+        .from("stores")
+        .update(store)
+        .eq("id", editingId);
+    } else {
+      result = await db
+        .from("stores")
+        .insert({
+          ...store,
+          is_active: true
+        });
+    }
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    form.reset();
+
+    const hiddenId = document.getElementById("editingStoreId");
+    if (hiddenId) {
+      hiddenId.value = "";
+    }
+
+    button.textContent = "দোকান সংরক্ষণ করুন";
+
+    showMessage(
+      message,
+      editingId
+        ? "দোকানের তথ্য সফলভাবে পরিবর্তন হয়েছে।"
+        : "নতুন দোকান সফলভাবে সংরক্ষণ হয়েছে।"
+    );
+
+    await loadStores();
+
+    if (typeof loadStoreCount === "function") {
+      await loadStoreCount();
+    }
+  } catch (error) {
+    console.error("Store save error:", error);
+    showMessage(
+      message,
+      "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
+      "error"
+    );
+  } finally {
+    button.disabled = false;
+  }
+}
 
   const storeName = document.getElementById("storeName").value.trim();
   const ownerName = document.getElementById("storeOwner").value.trim();
