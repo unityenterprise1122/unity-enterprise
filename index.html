@@ -120,69 +120,49 @@
     </main>
   </div>
 
-  <script>
-    const pages = {
-      home: ["ড্যাশবোর্ড", "ব্যবসার সার্বিক হিসাব এখানে দেখা যাবে।"],
-      stores: ["দোকান", "দোকানের নাম, মালিক, যোগাযোগ ও বাকি হিসাব।"],
-      products: ["পণ্য", "আইসক্রিমের নাম, ফ্লেভার, কার্টন ও মূল্য।"],
-      stock: ["গোডাউন স্টক", "প্রারম্ভিক স্টক, ক্রয়, ফেরত ও নষ্ট পণ্যের হিসাব।"],
-      deliveries: ["ডেলিভারি", "দোকান, গাড়ি, পণ্য ও ডেলিভারির হিসাব।"],
-      payments: ["টাকা আদায়", "ডেলিভারির সময় ও পরে আদায় করা টাকার হিসাব।"],
-      expenses: ["খরচ", "গাড়ির তেল, মেরামত ও অন্যান্য খরচ।"],
-      partners: ["অংশীদার", "দুই অংশীদারের মূলধন, জমা ও উত্তোলন।"],
-      reports: ["রিপোর্ট", "দৈনিক বিক্রি, বাকি, গাড়ি ও লাভ-ক্ষতির রিপোর্ট।"]
-    };
-
-    document.querySelectorAll("#menu button").forEach(button => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll("#menu button").forEach(item =>
-          item.classList.remove("active")
-        );
-        button.classList.add("active");
-        const page = pages[button.dataset.page];
-        document.getElementById("pageTitle").textContent = page[0];
-        document.getElementById("pageContent").innerHTML =
-          '<div class="panel"><h3>' + page[0] + '</h3><p class="muted">' +
-          page[1] + '</p><p>বাস্তব ডেটাবেস সংযোগ পরের ধাপে চালু করা হবে।</p></div>';
-      });
-    });
-  </script>
   
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(async function () {
-  const box = document.createElement("div");
-  box.style.cssText =
-    "margin:12px;padding:12px;border-radius:8px;background:#fff3cd;color:#333;font-family:Arial,sans-serif";
-  box.textContent = "Supabase সংযোগ পরীক্ষা হচ্ছে...";
-  document.body.prepend(box);
+  const pages = {
+    home: ["ড্যাশবোর্ড", "ব্যবসার সার্বিক হিসাব এখানে দেখা যাবে।"],
+    stores: ["দোকান", "দোকানের নাম, মালিক, যোগাযোগ ও বাকি হিসাব।"],
+    products: ["পণ্য", "আইসক্রিমের নাম, ফ্লেভার, কার্টন ও মূল্য।"],
+    stock: ["গোডাউন স্টক", "প্রারম্ভিক স্টক, ক্রয়, ফেরত ও নষ্ট পণ্যের হিসাব।"],
+    deliveries: ["ডেলিভারি", "দোকান, গাড়ি, পণ্য ও ডেলিভারির হিসাব।"],
+    payments: ["টাকা আদায়", "ডেলিভারির সময় ও পরে আদায় করা টাকার হিসাব।"],
+    expenses: ["খরচ", "গাড়ির তেল, মেরামত ও অন্যান্য খরচ।"],
+    partners: ["অংশীদার", "দুই অংশীদারের মূলধন, জমা ও উত্তোলন।"],
+    reports: ["রিপোর্ট", "দৈনিক বিক্রি, বাকি, গাড়ি ও লাভ-ক্ষতির রিপোর্ট।"]
+  };
 
-  try {
-    const client = window.supabase.createClient(
-      "https://yprcaiyftfqvkibehxtb.supabase.co",
-      "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5"
-    );
+  document.querySelectorAll("#menu button").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("#menu button").forEach(item =>
+        item.classList.remove("active")
+      );
+      button.classList.add("active");
 
-    const { error } = await client
-      .from("stores")
-      .select("id")
-      .limit(1);
+      const page = pages[button.dataset.page];
+      if (!page) return;
 
-    if (error) {
-      box.textContent =
-        "ডাটাবেস পরীক্ষা ব্যর্থ: " + error.message;
-      box.style.background = "#f8d7da";
-    } else {
-      box.textContent =
-        "Supabase সংযোগ সফল! ডাটাবেসে যোগাযোগ করা যাচ্ছে।";
-      box.style.background = "#d1e7dd";
-    }
-  } catch (e) {
-    box.textContent = "সংযোগে সমস্যা হয়েছে। পেইজ ও কোড পরীক্ষা করুন।";
-    box.style.background = "#f8d7da";
-  }
-})();
+      document.getElementById("pageTitle").textContent = page[0];
+
+      const content = document.getElementById("pageContent");
+      const storeSection = document.getElementById("storeFormSection");
+
+      if (button.dataset.page === "stores" && storeSection) {
+        content.replaceChildren(storeSection);
+        storeSection.style.display = "block";
+        return;
+      }
+
+      content.innerHTML =
+        '<div class="panel"><h3>' + page[0] +
+        '</h3><p class="muted">' + page[1] +
+        '</p><p>এই অংশের কাজ পরের ধাপে চালু করা হবে।</p></div>';
+    });
+  });
 </script>
+
 
 
 <section id="storeFormSection" style="margin:20px;padding:20px;background:white;border-radius:10px">
