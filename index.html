@@ -395,58 +395,62 @@ async function saveStore(event) {
   }
 }
 
-    async function loadStores() {
-      const list = document.getElementById("storeList");
-      const message = document.getElementById("storeListMessage");
-      if (!list || !message) return;
+    
+async function loadStores() {
+  const list = document.getElementById("storeList");
+  const message = document.getElementById("storeListMessage");
+  if (!list || !message) return;
 
-      list.replaceChildren();
+  list.replaceChildren();
 
-      if (!db) {
-        list.innerHTML = '<tr><td colspan="3">ডেটাবেস সংযুক্ত নয়।</td></tr>';
-        showMessage(message, "Supabase সংযোগ তৈরি হয়নি।", "error");
-        return;
-      }
+  if (!db) {
+    list.innerHTML = '<tr><td colspan="4">ডেটাবেস সংযুক্ত নয়।</td></tr>';
+    showMessage(message, "Supabase সংযোগ তৈরি হয়নি।", "error");
+    return;
+  }
 
-      showMessage(message, "দোকানের তালিকা লোড হচ্ছে...");
+  showMessage(message, "দোকানের তালিকা লোড হচ্ছে...");
 
-      try {
-        const { data, error } = await db
-          .from("stores")
-          .select("store_name, owner_name, opening_balance")
-          .order("store_name", { ascending: true });
+  try {
+    const { data, error } = await db
+      .from("stores")
+      .select("store_name, owner_name, address, opening_balance")
+      .order("store_name", { ascending: true });
 
-        if (error) throw error;
+    if (error) throw error;
 
-        if (!data || data.length === 0) {
-          list.innerHTML = '<tr><td colspan="3">এখনও কোনো দোকান যোগ করা হয়নি।</td></tr>';
-          showMessage(message, "মোট দোকান: 0", "success");
-          return;
-        }
-
-        data.forEach(store => {
-          const row = document.createElement("tr");
-
-          const nameCell = document.createElement("td");
-          nameCell.textContent = store.store_name || "";
-
-          const ownerCell = document.createElement("td");
-          ownerCell.textContent = store.owner_name || "উল্লেখ নেই";
-
-          const balanceCell = document.createElement("td");
-          balanceCell.textContent = "৳ " + money(store.opening_balance);
-
-          row.append(nameCell, ownerCell, balanceCell);
-          list.appendChild(row);
-        });
-
-        showMessage(message, "মোট দোকান: " + data.length, "success");
-      } catch (error) {
-        console.error("Load stores error:", error);
-        list.innerHTML = '<tr><td colspan="3">তালিকা আনা যায়নি। নিচের বার্তাটি দেখুন।</td></tr>';
-        showMessage(message, "তালিকা লোড হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
-      }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<tr><td colspan="4">এখনও কোনো দোকান যোগ করা হয়নি।</td></tr>';
+      showMessage(message, "মোট দোকান: 0", "success");
+      return;
     }
+
+    data.forEach(store => {
+      const row = document.createElement("tr");
+
+      const nameCell = document.createElement("td");
+      nameCell.textContent = store.store_name || "";
+
+      const ownerCell = document.createElement("td");
+      ownerCell.textContent = store.owner_name || "উল্লেখ নেই";
+
+      const addressCell = document.createElement("td");
+      addressCell.textContent = store.address || "উল্লেখ নেই";
+
+      const balanceCell = document.createElement("td");
+      balanceCell.textContent = "৳ " + money(store.opening_balance);
+
+      row.append(nameCell, ownerCell, addressCell, balanceCell);
+      list.appendChild(row);
+    });
+
+    showMessage(message, "মোট দোকান: " + data.length, "success");
+  } catch (error) {
+    console.error("Load stores error:", error);
+    list.innerHTML = '<tr><td colspan="4">তালিকা আনা যায়নি।</td></tr>';
+    showMessage(message, "তালিকা লোড হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
+  }
+}
 
     async function loadStoreCount() {
       const total = document.getElementById("totalStores");
