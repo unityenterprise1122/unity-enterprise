@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unity Enterprise - অফিস লগইন</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f4fa;
+      color: #17324d;
+    }
+    header {
+      background: #123b65;
+      color: white;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      max-width: 370px;
+      margin: 55px auto;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px #0001;
+    }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 14px;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    input { border: 1px solid #bbb; }
+    button {
+      border: 0;
+      color: white;
+      background: #123b65;
+      cursor: pointer;
+    }
+    #message { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Unity Enterprise</h2>
+    অফিস হিসাব ও স্টক ব্যবস্থাপনা
+  </header>
+
+  <main class="card">
+    <h2>অফিস লগইন</h2>
+    <p>আপনার অফিসের Supabase অ্যাকাউন্ট দিয়ে লগইন করুন।</p>
+
+    <form id="loginForm">
+      <label for="email">ইমেইল</label>
+      <input id="email" type="email" autocomplete="username" required>
+
+      <label for="password">পাসওয়ার্ড</label>
+      <input id="password" type="password"
+        autocomplete="current-password" required>
+
+      <button id="loginButton" type="submit">লগইন</button>
+    </form>
+    <p id="message" role="status"></p>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://yprcaiyftfqvkibehxtb.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_4dmw6mBMWMeHWB9Y98qezleg_JCHd-Bm5";
+
+    const message = document.getElementById("message");
+    const button = document.getElementById("loginButton");
+
+    const client = window.supabase.createClient(
+      SUPABASE_URL, SUPABASE_KEY
+    );
+
+    document.getElementById("loginForm").addEventListener(
+      "submit", async function(event) {
+        event.preventDefault();
+        button.disabled = true;
+        message.textContent = "লগইন পরীক্ষা হচ্ছে...";
+
+        try {
+          const { data, error } = await client.auth.signInWithPassword({
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value
+          });
+
+          if (error) throw error;
+
+          if (data.session) {
+            window.location.href = "./index.html";
+          }
+        } catch (error) {
+          message.textContent = "লগইন হয়নি: " + error.message;
+        } finally {
+          button.disabled = false;
+        }
+      }
+    );
+  </script>
+</body>
+</html>
