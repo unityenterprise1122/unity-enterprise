@@ -209,27 +209,7 @@
   
 <script>
 
-<section id="storeFormSection" style="display:none;margin:20px;padding:20px;background:white;border-radius:10px">
-  <h3>নতুন দোকান যোগ করুন</h3>
 
-  <form id="storeForm">
-    <label>দোকানের নাম</label>
-    <input id="storeName" required style="display:block;width:100%;padding:10px;margin:8px 0">
-
-    <label>মালিকের নাম</label>
-    <input id="storeOwner" style="display:block;width:100%;padding:10px;margin:8px 0">
-
-    <label>শুরুর বাকি (টাকা)</label>
-    <input id="storeBalance" type="number" min="0" step="0.01" value="0" required style="display:block;width:100%;padding:10px;margin:8px 0">
-
-    <button type="submit" style="padding:10px;background:#123b65;color:white;border:0;border-radius:6px">দোকান সংরক্ষণ করুন</button>
-  </form>
-
-  <p id="storeMessage"></p>
-  <h3>দোকানের তালিকা</h3>
-  <button id="loadStores" type="button">দোকানের তালিকা দেখুন</button>
-  <ul id="storeList"></ul>
-</section>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
