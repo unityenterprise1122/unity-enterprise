@@ -339,6 +339,154 @@
       loadStores();
     }
 
+function renderProducts() {
+  content.innerHTML = `
+    <section class="panel">
+      <h3>নতুন পণ্য যোগ করুন</h3>
+
+      <form id="productForm">
+        <label for="productName">পণ্যের নাম *</label>
+        <input id="productName" required maxlength="150">
+
+        <label for="productFlavor">ফ্লেভার</label>
+        <input id="productFlavor" maxlength="100">
+
+        <label for="piecesPerCarton">প্রতি কার্টনে পিস *</label>
+        <input id="piecesPerCarton" type="number" min="1" step="1" required>
+
+        <label for="purchaseCost">প্রতি পিস ক্রয়মূল্য (টাকা) *</label>
+        <input id="purchaseCost" type="number" min="0" step="0.01" required>
+
+        <label for="salePrice">প্রতি পিস বিক্রয়মূল্য (টাকা) *</label>
+        <input id="salePrice" type="number" min="0" step="0.01" required>
+
+        <button class="btn" type="submit">পণ্য সংরক্ষণ করুন</button>
+      </form>
+
+      <div id="productMessage" class="message" role="status"></div>
+    </section>
+
+    <section class="panel">
+      <h3>পণ্যের তালিকা</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>পণ্যের নাম</th>
+              <th>ফ্লেভার</th>
+              <th>কার্টনে পিস</th>
+              <th>ক্রয়মূল্য</th>
+              <th>বিক্রয়মূল্য</th>
+            </tr>
+          </thead>
+          <tbody id="productList">
+            <tr><td colspan="5">তালিকা লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+
+  document.getElementById("productForm")
+    .addEventListener("submit", saveProduct);
+
+  loadProducts();
+}
+
+async function saveProduct(event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const message = document.getElementById("productMessage");
+  const button = form.querySelector('button[type="submit"]');
+
+  if (!db) {
+    showMessage(message, "ডেটাবেস সংযুক্ত নয়।", "error");
+    return;
+  }
+
+  const productName = document.getElementById("productName").value.trim();
+  const flavor = document.getElementById("productFlavor").value.trim();
+  const pieces = Number(document.getElementById("piecesPerCarton").value);
+  const purchaseCost = Number(document.getElementById("purchaseCost").value);
+  const salePrice = Number(document.getElementById("salePrice").value);
+
+  if (!productName || !Number.isInteger(pieces) || pieces < 1 ||
+      !Number.isFinite(purchaseCost) || purchaseCost < 0 ||
+      !Number.isFinite(salePrice) || salePrice < 0) {
+    showMessage(message, "পণ্যের তথ্য সঠিকভাবে লিখুন।", "error");
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    const { error } = await db.from("products").insert({
+      product_name: productName,
+      flavor: flavor || null,
+      pieces_per_carton: pieces,
+      purchase_cost_per_piece: purchaseCost,
+      sale_price_per_piece: salePrice,
+      is_active: true
+    });
+
+    if (error) throw error;
+
+    form.reset();
+    showMessage(message, "পণ্য সফলভাবে সংরক্ষণ হয়েছে।");
+    await loadProducts();
+  } catch (error) {
+    console.error("Save product error:", error);
+    showMessage(message, "পণ্য সংরক্ষণ হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function loadProducts() {
+  const list = document.getElementById("productList");
+  if (!list || !db) return;
+
+  list.innerHTML = '<tr><td colspan="5">তালিকা লোড হচ্ছে...</td></tr>';
+
+  try {
+    const { data, error } = await db
+      .from("products")
+      .select("product_name, flavor, pieces_per_carton, purchase_cost_per_piece, sale_price_per_piece")
+      .eq("is_active", true)
+      .order("product_name");
+
+    if (error) throw error;
+
+    list.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<tr><td colspan="5">এখনো কোনো পণ্য যোগ করা হয়নি।</td></tr>';
+      return;
+    }
+
+    data.forEach(product => {
+      const row = document.createElement("tr");
+
+      [
+        product.product_name || "",
+        product.flavor || "—",
+        product.pieces_per_carton,
+        "৳ " + Number(product.purchase_cost_per_piece).toFixed(2),
+        "৳ " + Number(product.sale_price_per_piece).toFixed(2)
+      ].forEach(value => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      list.appendChild(row);
+    });
+  } catch (error) {
+    console.error("Load products error:", error);
+    list.innerHTML = '<tr><td colspan="5">পণ্যের তালিকা লোড হয়নি। আবার চেষ্টা করুন।</td></tr>';
+  }
+}
+
  
 
 function editStore(store) {
@@ -572,6 +720,7 @@ row.append(nameCell, ownerCell, addressCell, balanceCell, actionCell);
 
       if (pageKey === "home") renderHome();
       else if (pageKey === "stores") renderStores();
+        else if (pageKey === "products") renderProducts();
       else renderPlaceholder(pageKey);
     }
 
