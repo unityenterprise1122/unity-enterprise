@@ -1,766 +1,158 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Unity Enterprise হিসাব সফটওয়্যার</title>
-  <style>
-    :root {
-      --navy: #123b65;
-      --blue: #1769aa;
-      --bg: #f2f5f9;
-      --white: #ffffff;
-      --text: #243447;
-      --muted: #64748b;
-      --border: #dce4ee;
-      --green: #d1e7dd;
-      --red: #f8d7da;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, "Noto Sans Bengali", sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-
-    header {
-      background: var(--navy);
-      color: white;
-      padding: 18px 22px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 23px;
-    }
-
-    header p {
-      margin: 6px 0 0;
-      opacity: .9;
-      font-size: 14px;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
-      min-height: calc(100vh - 85px);
-    }
-
-    nav {
-      background: #fff;
-      padding: 14px;
-      border-right: 1px solid var(--border);
-    }
-
-    nav button {
-      width: 100%;
-      display: block;
-      text-align: left;
-      padding: 12px;
-      margin-bottom: 6px;
-      background: white;
-      border: 1px solid transparent;
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 15px;
-      color: var(--text);
-    }
-
-    nav button:hover,
-    nav button.active {
-      background: #e8f1fb;
-      border-color: #c7d9ef;
-      color: var(--navy);
-      font-weight: bold;
-    }
-
-    main { padding: 24px; min-width: 0; }
-
-    h2 { margin-top: 0; }
-
-    .panel, .card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 5px #00000008;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .card p { color: var(--muted); margin: 0 0 10px; }
-    .card strong { font-size: 24px; }
-
-    label {
-      display: block;
-      margin: 13px 0 5px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font: inherit;
-      background: white;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid #b8d7f5;
-      border-color: var(--blue);
-    }
-
-    .btn {
-      display: inline-block;
-      border: 0;
-      border-radius: 6px;
-      background: var(--navy);
-      color: white;
-      padding: 11px 16px;
-      margin: 12px 6px 0 0;
-      cursor: pointer;
-      font: inherit;
-    }
-
-    .btn:hover { background: var(--blue); }
-    .btn.secondary { background: #526579; }
-
-    .message {
-      padding: 10px;
-      border-radius: 6px;
-      margin: 12px 0;
-      overflow-wrap: anywhere;
-    }
-
-    .message:empty { display: none; }
-    .message.success { background: var(--green); }
-    .message.error { background: var(--red); }
-    .muted { color: var(--muted); }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      min-width: 500px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 11px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th { background: #edf3f9; }
-
-    .status {
-      margin-top: 12px;
-      padding: 9px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      overflow-wrap: anywhere;
-    }
-
-    @media (max-width: 760px) {
-      .layout { grid-template-columns: 1fr; }
-      nav {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 5px;
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-      }
-      nav button { margin: 0; font-size: 13px; }
-      main { padding: 14px; }
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      header h1 { font-size: 20px; }
-    }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unity Enterprise হিসাব সফটওয়্যার</title>
+<style>
+:root{--navy:#123b65;--blue:#1769aa;--bg:#f2f5f9;--white:#fff;--text:#243447;--muted:#64748b;--border:#dce4ee;--green:#e0f5e9;--red:#fde8e8;--gold:#fff4d6}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Bengali",sans-serif;color:var(--text);background:var(--bg)}
+header{background:var(--navy);color:#fff;padding:16px 22px}header h1{margin:0;font-size:23px}header p{margin:6px 0 0;font-size:14px}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 80px)}nav{background:#fff;padding:12px;border-right:1px solid var(--border)}
+nav button{width:100%;text-align:left;padding:11px;margin-bottom:5px;background:#fff;border:1px solid transparent;border-radius:7px;cursor:pointer;font-size:15px;color:var(--text)}
+nav button:hover,nav button.active{background:#e8f1fb;border-color:#c7d9ef;color:var(--navy);font-weight:bold}
+main{padding:22px;min-width:0}h2{margin-top:0}.panel,.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:17px;margin-bottom:16px;box-shadow:0 2px 5px #00000008}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card p{color:var(--muted);margin:0 0 9px}.card strong{font-size:22px}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font:inherit;background:#fff}input[type=checkbox]{width:auto}
+button.primary,button.secondary,button.danger{border:0;border-radius:6px;padding:10px 14px;cursor:pointer;font:inherit;font-weight:600}
+button.primary{background:var(--blue);color:#fff}button.secondary{background:#e8eef5;color:#123b65}button.danger{background:#fde8e8;color:#9f1239}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{border:1px solid var(--border);padding:9px;text-align:left;vertical-align:middle}th{background:#edf3f9;white-space:nowrap}td input{min-width:105px;padding:7px}.right{text-align:right}.muted{color:var(--muted)}.status,.message{padding:10px 12px;border-radius:7px;margin:10px 0;background:#edf3f9}.success{background:var(--green);color:#166534}.error{background:var(--red);color:#991b1b}.warning{background:var(--gold);color:#854d0e}.actions{display:flex;gap:7px;flex-wrap:wrap}.small{font-size:13px}.hidden{display:none!important}.summary{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.summary span{background:#edf3f9;padding:8px 12px;border-radius:7px}.login-box{max-width:440px;margin:35px auto}.login-box input{margin-bottom:10px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;border-right:0;border-bottom:1px solid var(--border)}nav button{margin:0;font-size:13px}main{padding:12px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{header,nav,#connectionStatus,.no-print,button{display:none!important}.layout{display:block}main{padding:0}.panel,.card{box-shadow:none;break-inside:avoid}body{background:#fff}}
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>Unity Enterprise</h1>
-    <p>আইসক্রিম ডিলারশিপ হিসাব ব্যবস্থাপনা</p>
-  </header>
-
-  <div class="layout">
-    <nav id="menu">
-      <button class="active" data-page="home">🏠 ড্যাশবোর্ড</button>
-      <button data-page="stores">🏪 দোকান</button>
-      <button data-page="products">🍦 পণ্য</button>
-      <button data-page="stock">📦 গোডাউন স্টক</button>
-      <button data-page="vehicles">🚚 গাড়ি</button>
-      <button data-page="deliveries">🧾 ডেলিভারি</button>
-      <button data-page="payments">💵 টাকা আদায়</button>
-      <button data-page="expenses">💳 খরচ</button>
-      <button data-page="partners">🤝 অংশীদার</button>
-      <button data-page="reports">📊 রিপোর্ট</button>
-    </nav>
-
-    <main>
-      <h2 id="pageTitle">ড্যাশবোর্ড</h2>
-      <div id="pageContent"></div>
-      <div id="connectionStatus" class="status">
-        ডেটাবেস সংযোগ পরীক্ষা হচ্ছে...
-      </div>
-    </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-  (() => {
-    "use strict";
-
-    const SUPABASE_URL = "https://yprcaiyftfqvkibehxtb.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5";
-
-    const title = document.getElementById("pageTitle");
-    const content = document.getElementById("pageContent");
-    const connectionStatus = document.getElementById("connectionStatus");
-    const menu = document.getElementById("menu");
-
-    const pages = {
-      home: ["ড্যাশবোর্ড", "ব্যবসার সার্বিক হিসাব"],
-      stores: ["দোকান", "দোকান যোগ করুন এবং দোকানের তালিকা দেখুন"],
-      products: ["পণ্য", "পণ্যের নাম, ফ্লেভার, কার্টন ও মূল্য"],
-      stock: ["গোডাউন স্টক", "প্রারম্ভিক স্টক, ক্রয়, ফেরত ও নষ্ট পণ্যের হিসাব"],
-      vehicles: ["গাড়ি", "ডেলিভারি গাড়ির তথ্য"],
-      deliveries: ["ডেলিভারি", "দোকান, গাড়ি ও পণ্য সরবরাহের হিসাব"],
-      payments: ["টাকা আদায়", "দোকানের কাছ থেকে আদায় করা টাকা"],
-      expenses: ["খরচ", "গাড়ির তেল, মেরামত ও অন্যান্য খরচ"],
-      partners: ["অংশীদার", "মূলধন, জমা ও উত্তোলনের হিসাব"],
-      reports: ["রিপোর্ট", "দৈনিক বিক্রি, বাকি ও লাভ-ক্ষতির রিপোর্ট"]
-    };
-
-    let db = null;
-    let currentPage = "home";
-
-    function showMessage(element, message, type = "") {
-      element.textContent = message;
-      element.className = "message" + (type ? " " + type : "");
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
-    }
-
-    function money(value) {
-      return Number(value || 0).toLocaleString("en-BD", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    function renderHome() {
-      content.innerHTML = `
-        <div class="cards">
-          <div class="card"><p>মোট দোকান</p><strong id="totalStores">—</strong></div>
-          <div class="card"><p>পণ্যের ধরন</p><strong>—</strong></div>
-          <div class="card"><p>আজকের বিক্রি</p><strong>৳ —</strong></div>
-          <div class="card"><p>দোকানে মোট বাকি</p><strong>৳ —</strong></div>
-        </div>
-        <div class="panel">
-          <h3>স্বাগতম</h3>
-          <p>Unity Enterprise হিসাব ব্যবস্থাপনায় স্বাগতম।</p>
-          <p class="muted">বাস্তব বিক্রি, স্টক ও বাকি দেখানোর জন্য সংশ্লিষ্ট মডিউল ও হিসাবের নিয়ম সম্পূর্ণ করতে হবে।</p>
-        </div>`;
-      loadStoreCount();
-    }
-
-    function renderStores() {
-      content.innerHTML = `
-        <section class="panel">
-          <h3>নতুন দোকান যোগ করুন</h3>
-          <form id="storeForm">
-            <label for="storeName">দোকানের নাম *</label>
-            <input id="storeName" required maxlength="150" autocomplete="organization">
-
-            <label for="storeOwner">মালিকের নাম</label>
-            <input id="storeOwner" maxlength="150">
-            
-<label for="storeAddress">দোকানের ঠিকানা</label>
-<textarea id="storeAddress" maxlength="500" rows="3" placeholder="দোকানের সম্পূর্ণ ঠিকানা লিখুন"></textarea>
-
-
-            <label for="storeBalance">শুরুর বাকি (টাকা)</label>
-            <input id="storeBalance" type="number" min="0" step="0.01" value="0" required>
-
-            <button class="btn" type="submit">দোকান সংরক্ষণ করুন</button>
-            <button class="btn secondary" type="button" id="refreshStores">তালিকা রিফ্রেশ করুন</button>
-          </form>
-          <div id="storeMessage" class="message" role="status"></div>
-        </section>
-
-        <section class="panel">
-          <h3>দোকানের তালিকা</h3>
-          <p class="muted">ডেটাবেসে সংরক্ষিত দোকানগুলো এখানে দেখা যাবে।</p>
-          <div id="storeListMessage" class="message" role="status"></div>
-          <div class="table-wrap">
-            <table>
-             
-<thead>
-  <tr>
-    <th>দোকানের নাম</th>
-    <th>মালিক</th>
-    <th>দোকানের ঠিকানা</th>
-    <th>শুরুর বাকি</th>
-    <th>কাজ</th>
-  </tr>
-</thead>
-
-              <tbody id="storeList">
-                <tr><td colspan="3">তালিকা লোড হচ্ছে...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>`;
-
-      document.getElementById("storeForm").addEventListener("submit", saveStore);
-      document.getElementById("refreshStores").addEventListener("click", loadStores);
-      loadStores();
-    }
-
-function renderProducts() {
-  content.innerHTML = `
-    <section class="panel">
-      <h3>নতুন পণ্য যোগ করুন</h3>
-
-      <form id="productForm">
-        <label for="productName">পণ্যের নাম *</label>
-        <input id="productName" required maxlength="150">
-
-        <label for="productFlavor">ফ্লেভার</label>
-        <input id="productFlavor" maxlength="100">
-
-        <label for="piecesPerCarton">প্রতি কার্টনে পিস *</label>
-        <input id="piecesPerCarton" type="number" min="1" step="1" required>
-
-        <label for="purchaseCost">প্রতি পিস ক্রয়মূল্য (টাকা) *</label>
-        <input id="purchaseCost" type="number" min="0" step="0.01" required>
-
-        <label for="salePrice">প্রতি পিস বিক্রয়মূল্য (টাকা) *</label>
-        <input id="salePrice" type="number" min="0" step="0.01" required>
-
-        <button class="btn" type="submit">পণ্য সংরক্ষণ করুন</button>
-      </form>
-
-      <div id="productMessage" class="message" role="status"></div>
-    </section>
-
-    <section class="panel">
-      <h3>পণ্যের তালিকা</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>পণ্যের নাম</th>
-              <th>ফ্লেভার</th>
-              <th>কার্টনে পিস</th>
-              <th>ক্রয়মূল্য</th>
-              <th>বিক্রয়মূল্য</th>
-            </tr>
-          </thead>
-          <tbody id="productList">
-            <tr><td colspan="5">তালিকা লোড হচ্ছে...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>`;
-
-  document.getElementById("productForm")
-    .addEventListener("submit", saveProduct);
-
-  loadProducts();
+<header><h1>Unity Enterprise</h1><p>আইসক্রিম ডিলারশিপ হিসাব ব্যবস্থাপনা</p></header>
+<div id="loginArea" class="panel login-box hidden">
+<h2>লগইন</h2><p class="muted">আপনার Supabase অ্যাকাউন্টের ইমেইল ও পাসওয়ার্ড দিন।</p>
+<form id="loginForm"><label>ইমেইল</label><input id="loginEmail" type="email" required autocomplete="username"><label>পাসওয়ার্ড</label><input id="loginPassword" type="password" required autocomplete="current-password"><button class="primary" type="submit">লগইন করুন</button></form><div id="loginMessage" class="message"></div>
+</div>
+<div id="appArea" class="layout hidden">
+<nav id="menu">
+<button class="active" data-page="home">🏠 ড্যাশবোর্ড</button><button data-page="stores">🏪 দোকান</button>
+<button data-page="daily">🧾 ড্রাইভারের দৈনিক হিসাব</button><button data-page="reports">📊 দৈনিক/মাসিক রিপোর্ট</button>
+<button data-page="products">🍦 পণ্য</button><button data-page="stock">📦 গোডাউন স্টক</button><button data-page="vehicles">🚚 গাড়ি/ড্রাইভার</button>
+<button data-page="expenses">💳 খরচ</button><button data-page="partners">🤝 অংশীদার</button><button id="logoutButton">🚪 লগআউট</button>
+</nav>
+<main><div class="actions no-print" style="justify-content:flex-end"><button class="secondary" id="refreshButton">তথ্য রিফ্রেশ</button><button class="secondary" onclick="window.print()">প্রিন্ট / PDF</button></div><h2 id="pageTitle">ড্যাশবোর্ড</h2><div id="pageContent"></div><div id="connectionStatus" class="status">ডেটাবেস সংযোগ পরীক্ষা হচ্ছে...</div></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+"use strict";
+const SUPABASE_URL="https://yprcaiyftfqvkibehxtb.supabase.co";
+const SUPABASE_KEY="sb_publishable_4dmw6mBMWeHWBY98qezleg_JCHd-Bm5";
+const $=id=>document.getElementById(id), content=$("pageContent"), title=$("pageTitle");
+let db=null, currentPage="home", stores=[], vehicles=[], entries=[], editingDate=null, editingVehicle=null;
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>Number(v||0);
+const money=v=>"৳ "+num(v).toLocaleString("en-BD",{minimumFractionDigits:2,maximumFractionDigits:2});
+const msg=(id,text,type="")=>{const el=$(id);if(el){el.textContent=text;el.className="message "+type}};
+const setStatus=(text,type="")=>{const el=$("connectionStatus");el.textContent=text;el.className="status "+type};
+function pageShell(html){content.innerHTML=html}
+async function authState(){
+ const {data:{session}}=await db.auth.getSession();
+ if(session){$("loginArea").classList.add("hidden");$("appArea").classList.remove("hidden");await startApp()}
+ else{$("appArea").classList.add("hidden");$("loginArea").classList.remove("hidden");setStatus("ডেটাবেসে লগইন করা নেই।")}
 }
-
-async function saveProduct(event) {
-  event.preventDefault();
-
-  const form = event.currentTarget;
-  const message = document.getElementById("productMessage");
-  const button = form.querySelector('button[type="submit"]');
-
-  if (!db) {
-    showMessage(message, "ডেটাবেস সংযুক্ত নয়।", "error");
-    return;
-  }
-
-  const productName = document.getElementById("productName").value.trim();
-  const flavor = document.getElementById("productFlavor").value.trim();
-  const pieces = Number(document.getElementById("piecesPerCarton").value);
-  const purchaseCost = Number(document.getElementById("purchaseCost").value);
-  const salePrice = Number(document.getElementById("salePrice").value);
-
-  if (!productName || !Number.isInteger(pieces) || pieces < 1 ||
-      !Number.isFinite(purchaseCost) || purchaseCost < 0 ||
-      !Number.isFinite(salePrice) || salePrice < 0) {
-    showMessage(message, "পণ্যের তথ্য সঠিকভাবে লিখুন।", "error");
-    return;
-  }
-
-  button.disabled = true;
-
-  try {
-    const { error } = await db.from("products").insert({
-      product_name: productName,
-      flavor: flavor || null,
-      pieces_per_carton: pieces,
-      purchase_cost_per_piece: purchaseCost,
-      sale_price_per_piece: salePrice,
-      is_active: true
-    });
-
-    if (error) throw error;
-
-    form.reset();
-    showMessage(message, "পণ্য সফলভাবে সংরক্ষণ হয়েছে।");
-    await loadProducts();
-  } catch (error) {
-    console.error("Save product error:", error);
-    showMessage(message, "পণ্য সংরক্ষণ হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
-  } finally {
-    button.disabled = false;
-  }
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();msg("loginMessage","লগইন হচ্ছে...");const {error}=await db.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){msg("loginMessage","লগইন ব্যর্থ: "+error.message,"error")}else{msg("loginMessage","লগইন সফল","success");await authState()}});
+$("logoutButton").addEventListener("click",async()=>{await db.auth.signOut();location.reload()});
+$("refreshButton").addEventListener("click",()=>navigate(currentPage));
+$("menu").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)navigate(b.dataset.page)});
+async function loadBaseData(){
+ const [s,v]=await Promise.all([
+ db.from("stores").select("id,store_name,owner_name,opening_balance,is_active").order("store_name"),
+ db.from("vehicles").select("*").order("id")
+ ]);
+ if(s.error)throw new Error("দোকানের তালিকা: "+s.error.message);
+ if(v.error)throw new Error("গাড়ি/ড্রাইভারের তালিকা: "+v.error.message);
+ stores=(s.data||[]).filter(x=>x.is_active!==false);
+ vehicles=(v.data||[]).filter(x=>x.is_active!==false);
 }
-
-async function loadProducts() {
-  const list = document.getElementById("productList");
-  if (!list || !db) return;
-
-  list.innerHTML = '<tr><td colspan="5">তালিকা লোড হচ্ছে...</td></tr>';
-
-  try {
-    const { data, error } = await db
-      .from("products")
-      .select("product_name, flavor, pieces_per_carton, purchase_cost_per_piece, sale_price_per_piece")
-      .eq("is_active", true)
-      .order("product_name");
-
-    if (error) throw error;
-
-    list.innerHTML = "";
-
-    if (!data || data.length === 0) {
-      list.innerHTML = '<tr><td colspan="5">এখনো কোনো পণ্য যোগ করা হয়নি।</td></tr>';
-      return;
-    }
-
-    data.forEach(product => {
-      const row = document.createElement("tr");
-
-      [
-        product.product_name || "",
-        product.flavor || "—",
-        product.pieces_per_carton,
-        "৳ " + Number(product.purchase_cost_per_piece).toFixed(2),
-        "৳ " + Number(product.sale_price_per_piece).toFixed(2)
-      ].forEach(value => {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        row.appendChild(cell);
-      });
-
-      list.appendChild(row);
-    });
-  } catch (error) {
-    console.error("Load products error:", error);
-    list.innerHTML = '<tr><td colspan="5">পণ্যের তালিকা লোড হয়নি। আবার চেষ্টা করুন।</td></tr>';
-  }
+function vehicleLabel(v){return v.vehicle_name||v.driver_name||v.name||v.registration_number||v.registration_num||v.title||("ড্রাইভার/গাড়ি #"+v.id)}
+function vehicleOptions(selected=""){return `<option value="">ড্রাইভার নির্বাচন করুন</option>`+vehicles.map(v=>`<option value="${v.id}" ${String(selected)===String(v.id)?"selected":""}>${esc(vehicleLabel(v))}</option>`).join("")}
+function storeOptions(){return stores.map(s=>`<option value="${s.id}">${esc(s.store_name)}${s.owner_name?" — "+esc(s.owner_name):""}</option>`).join("")}
+async function navigate(key){currentPage=key;const labels={home:"ড্যাশবোর্ড",stores:"দোকান",daily:"ড্রাইভারের দৈনিক হিসাব",reports:"দৈনিক/মাসিক রিপোর্ট",products:"পণ্য",stock:"গোডাউন স্টক",vehicles:"গাড়ি/ড্রাইভার",expenses:"খরচ",partners:"অংশীদার"};title.textContent=labels[key]||"হিসাব";document.querySelectorAll("#menu button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===key));try{await loadBaseData();if(key==="home")await renderHome();else if(key==="stores")await renderStores();else if(key==="daily")await renderDaily();else if(key==="reports")await renderReports();else if(key==="vehicles")renderVehicles();else renderSimple(key);setStatus("Supabase সংযোগ সফল।","success")}catch(e){pageShell(`<section class="panel"><div class="message error">${esc(e.message)}</div><p>Supabase টেবিল/কলামের নাম ও RLS অনুমতি যাচাই করুন।</p></section>`);setStatus("ডেটা লোডে সমস্যা: "+e.message,"error");console.error(e)}}
+async function renderHome(){
+ const {data,error}=await db.from("daily_shop_entries").select("entry_date,sales_amount,today_collection,old_due_collection");
+ if(error)throw error;
+ const rows=data||[],t=today(),todayRows=rows.filter(r=>r.entry_date===t),month=t.slice(0,7),monthRows=rows.filter(r=>r.entry_date?.startsWith(month));
+ const due=stores.reduce((sum,s)=>sum+num(s.opening_balance),0)+rows.reduce((sum,r)=>sum+num(r.sales_amount)-num(r.today_collection)-num(r.old_due_collection),0);
+ pageShell(`<div class="cards"><div class="card"><p>সক্রিয় দোকান</p><strong>${stores.length}</strong></div><div class="card"><p>আজকের বিক্রি</p><strong>${money(todayRows.reduce((a,r)=>a+num(r.sales_amount),0))}</strong></div><div class="card"><p>আজ মোট আদায়</p><strong>${money(todayRows.reduce((a,r)=>a+num(r.today_collection)+num(r.old_due_collection),0))}</strong></div><div class="card"><p>দোকানে মোট বাকি (আনুমানিক)</p><strong>${money(due)}</strong></div></div><section class="panel"><h3>দ্রুত কাজ</h3><p>ড্রাইভারের দৈনিক হিসাব খুলে তারিখ ও ড্রাইভার নির্বাচন করে দোকানভিত্তিক বিক্রি ও টাকা আদায় লিখুন।</p><button class="primary" onclick="window.goPage('daily')">দৈনিক হিসাব শুরু করুন</button><p class="muted small">নোট: বাকি হিসাবের মধ্যে দোকানের প্রারম্ভিক বাকি ও সংরক্ষিত দৈনিক এন্ট্রি ধরা হয়েছে।</p></section>`);
 }
-
- 
-
-function editStore(store) {
-  document.getElementById("storeName").value = store.store_name || "";
-  document.getElementById("storeOwner").value = store.owner_name || "";
-  document.getElementById("storeAddress").value = store.address || "";
-  document.getElementById("storeBalance").value = store.opening_balance ?? 0;
-
-  let hiddenId = document.getElementById("editingStoreId");
-
-  if (!hiddenId) {
-    hiddenId = document.createElement("input");
-    hiddenId.type = "hidden";
-    hiddenId.id = "editingStoreId";
-    document.getElementById("storeForm").appendChild(hiddenId);
-  }
-
-  hiddenId.value = store.id;
-
-  const button = document.querySelector('#storeForm button[type="submit"]');
-  if (button) {
-    button.textContent = "পরিবর্তন সংরক্ষণ করুন";
-  }
-
-  document.getElementById("storeForm").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+async function renderStores(){
+ const {data,error}=await db.from("stores").select("id,store_name,owner_name,phone,address,opening_balance,is_active").order("store_name");
+ if(error)throw error;stores=(data||[]).filter(x=>x.is_active!==false);
+ pageShell(`<section class="panel"><h3>নতুন দোকান যোগ করুন</h3><form id="storeForm" class="form-grid"><div><label>দোকানের নাম *</label><input id="storeName" required></div><div><label>মালিকের নাম</label><input id="storeOwner"></div><div><label>শুরুর বাকি (৳)</label><input id="storeBalance" type="number" min="0" step=".01" value="0"></div><div><button class="primary">দোকান সংরক্ষণ করুন</button></div></form><div id="storeMsg" class="message"></div></section><section class="panel"><h3>দোকানের তালিকা (${stores.length})</h3><div class="table-wrap"><table><thead><tr><th>দোকান</th><th>মালিক</th><th>শুরুর বাকি</th><th>বর্তমান বাকি*</th></tr></thead><tbody>${stores.map(s=>`<tr><td>${esc(s.store_name)}</td><td>${esc(s.owner_name||"—")}</td><td>${money(s.opening_balance)}</td><td id="due-${s.id}">হিসাব হচ্ছে…</td></tr>`).join("")||'<tr><td colspan="4">কোনো দোকান নেই</td></tr>'}</tbody></table></div><p class="small muted">*বর্তমান বাকি দৈনিক হিসাব থেকে হিসাব করা হয়। একই দোকানের একাধিক ড্রাইভার এন্ট্রি করলে দোকানের বাকি একত্রে দেখাবে।</p></section>`);
+ $("storeForm").addEventListener("submit",saveStore);
+ const {data:all,error:e}=await db.from("daily_shop_entries").select("store_id,sales_amount,today_collection,old_due_collection");
+ if(e)throw e;
+ stores.forEach(s=>{const d=num(s.opening_balance)+(all||[]).filter(r=>String(r.store_id)===String(s.id)).reduce((a,r)=>a+num(r.sales_amount)-num(r.today_collection)-num(r.old_due_collection),0);const el=$("due-"+s.id);if(el)el.textContent=money(d)});
 }
-
-async function saveStore(event) {
-  event.preventDefault();
-
-  const form = event.currentTarget;
-  const message = document.getElementById("storeMessage");
-  const button = form.querySelector('button[type="submit"]');
-
-  if (!db) {
-    showMessage(message, "ডেটাবেস সংযুক্ত নয়। সংযোগ পরীক্ষা করুন।", "error");
-    return;
-  }
-
-  const storeName = document.getElementById("storeName").value.trim();
-  const ownerName = document.getElementById("storeOwner").value.trim();
-  const address = document.getElementById("storeAddress").value.trim();
-  const balance = Number(document.getElementById("storeBalance").value);
-  const editingId = document.getElementById("editingStoreId")?.value;
-
-  if (!storeName) {
-    showMessage(message, "দোকানের নাম লিখুন।", "error");
-    return;
-  }
-
-  if (!Number.isFinite(balance) || balance < 0) {
-    showMessage(message, "শুরুর বাকি সঠিকভাবে লিখুন।", "error");
-    return;
-  }
-
-  const store = {
-    store_name: storeName,
-    owner_name: ownerName || null,
-    address: address || null,
-    opening_balance: balance
-  };
-
-  button.disabled = true;
-
-  try {
-    let result;
-
-    if (editingId) {
-      result = await db
-        .from("stores")
-        .update(store)
-        .eq("id", editingId);
-    } else {
-      result = await db
-        .from("stores")
-        .insert({
-          ...store,
-          is_active: true
-        });
-    }
-
-    if (result.error) {
-      throw result.error;
-    }
-
-    form.reset();
-
-    const hiddenId = document.getElementById("editingStoreId");
-    if (hiddenId) {
-      hiddenId.value = "";
-    }
-
-    button.textContent = "দোকান সংরক্ষণ করুন";
-
-    showMessage(
-      message,
-      editingId
-        ? "দোকানের তথ্য সফলভাবে পরিবর্তন হয়েছে।"
-        : "নতুন দোকান সফলভাবে সংরক্ষণ হয়েছে।"
-    );
-
-    await loadStores();
-
-    if (typeof loadStoreCount === "function") {
-      await loadStoreCount();
-    }
-  } catch (error) {
-    console.error("Store save error:", error);
-    showMessage(
-      message,
-      "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
-      "error"
-    );
-  } finally {
-    button.disabled = false;
-  }
+async function saveStore(e){e.preventDefault();const row={store_name:$("storeName").value.trim(),owner_name:$("storeOwner").value.trim()||null,opening_balance:num($("storeBalance").value),is_active:true};const {error}=await db.from("stores").insert(row);if(error){msg("storeMsg","সংরক্ষণ হয়নি: "+error.message,"error");return}msg("storeMsg","দোকান সংরক্ষণ হয়েছে।","success");$("storeForm").reset();$("storeBalance").value="0";await renderStores()}
+async function renderDaily(){
+ pageShell(`<section class="panel"><h3>দৈনিক হিসাব নির্বাচন</h3><div class="form-grid"><div><label>তারিখ *</label><input type="date" id="entryDate" value="${editingDate||today()}"></div><div><label>ড্রাইভার/গাড়ি *</label><select id="entryVehicle">${vehicleOptions(editingVehicle||"")}</select></div><div><label>নোট (ঐচ্ছিক)</label><input id="entryNotes" placeholder="যেমন: সকালের রুট"></div><div><button class="primary" id="loadEntryBtn">দোকান তালিকা দেখান</button></div></div><div id="dailyMsg" class="message">তারিখ ও ড্রাইভার নির্বাচন করে “দোকান তালিকা দেখান” চাপুন।</div></section><div id="dailyEntryArea"></div><section class="panel"><h3>আগের সংরক্ষিত দৈনিক হিসাব</h3><div class="form-grid"><div><label>তারিখ থেকে</label><input type="date" id="historyFrom" value="${today().slice(0,8)}01"></div><div><label>তারিখ পর্যন্ত</label><input type="date" id="historyTo" value="${today()}"></div><div><label>ড্রাইভার</label><select id="historyVehicle"><option value="">সব ড্রাইভার</option>${vehicleOptions().replace('<option value="">ড্রাইভার নির্বাচন করুন</option>','')}</select></div><div><button class="secondary" id="historyBtn">তালিকা দেখান</button></div></div><div id="historyArea"></div></section>`);
+ $("loadEntryBtn").addEventListener("click",loadDailyRows);$("historyBtn").addEventListener("click",loadHistory);
+ if(editingDate&&editingVehicle)await loadDailyRows();
+ await loadHistory();
 }
-
-async function loadStores() {
-  const list = document.getElementById("storeList");
-  const message = document.getElementById("storeListMessage");
-  if (!list || !message) return;
-
-  list.replaceChildren();
-
-  if (!db) {
-    list.innerHTML = '<tr><td colspan="4">ডেটাবেস সংযুক্ত নয়।</td></tr>';
-    showMessage(message, "Supabase সংযোগ তৈরি হয়নি।", "error");
-    return;
-  }
-
-  showMessage(message, "দোকানের তালিকা লোড হচ্ছে...");
-
-  try {
-    const { data, error } = await db
-      .from("stores")
-      .select("id, store_name, owner_name, address, opening_balance")
-      .order("store_name", { ascending: true });
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      list.innerHTML = '<tr><td colspan="4">এখনও কোনো দোকান যোগ করা হয়নি।</td></tr>';
-      showMessage(message, "মোট দোকান: 0", "success");
-      return;
-    }
-
-    data.forEach(store => {
-      const row = document.createElement("tr");
-
-      const nameCell = document.createElement("td");
-      nameCell.textContent = store.store_name || "";
-
-      const ownerCell = document.createElement("td");
-      ownerCell.textContent = store.owner_name || "উল্লেখ নেই";
-
-      const addressCell = document.createElement("td");
-      addressCell.textContent = store.address || "উল্লেখ নেই";
-
-      const balanceCell = document.createElement("td");
-      balanceCell.textContent = "৳ " + money(store.opening_balance);
-
-      
-const actionCell = document.createElement("td");
-
-const editButton = document.createElement("button");
-editButton.type = "button";
-editButton.className = "btn";
-editButton.textContent = "সম্পাদনা";
-
-editButton.addEventListener("click", () => {
-  editStore(store);
-});
-
-actionCell.appendChild(editButton);
-
-row.append(nameCell, ownerCell, addressCell, balanceCell, actionCell);
-
-      list.appendChild(row);
-    });
-
-    showMessage(message, "মোট দোকান: " + data.length, "success");
-  } catch (error) {
-    console.error("Load stores error:", error);
-    list.innerHTML = '<tr><td colspan="4">তালিকা আনা যায়নি।</td></tr>';
-    showMessage(message, "তালিকা লোড হয়নি: " + (error.message || "অজানা সমস্যা"), "error");
-  }
+async function loadDailyRows(){
+ const date=$("entryDate").value,vid=$("entryVehicle").value;if(!date||!vid){msg("dailyMsg","তারিখ এবং ড্রাইভার নির্বাচন করুন।","error");return}
+ const {data,error}=await db.from("daily_shop_entries").select("*").eq("entry_date",date).eq("vehicle_id",vid);
+ if(error){msg("dailyMsg","ডেটা পড়া যায়নি: "+error.message,"error");return}
+ const existing=new Map((data||[]).map(r=>[String(r.store_id),r]));
+ const rows=stores.map(s=>{const r=existing.get(String(s.id));return `<tr data-store="${s.id}" data-id="${r?.id||""}"><td>${esc(s.store_name)}<div class="small muted">${esc(s.owner_name||"")}</div></td><td><input class="sale" type="number" min="0" step=".01" value="${r?num(r.sales_amount):0}"></td><td><input class="todayCash" type="number" min="0" step=".01" value="${r?num(r.today_collection):0}"></td><td><input class="oldCash" type="number" min="0" step=".01" value="${r?num(r.old_due_collection):0}"></td><td class="newDue">${money(num(r?.sales_amount)-num(r?.today_collection))}</td><td class="totalCash">${money(num(r?.today_collection)+num(r?.old_due_collection))}</td><td><input class="note" value="${esc(r?.notes||"")}" placeholder="নোট"></td></tr>`}).join("");
+ pageShellForDaily(rows,date,vid);
+ msg("dailyMsg",`দোকান ${stores.length}টি। আগে সংরক্ষিত এন্ট্রি থাকলে সেটি লোড হয়েছে; পরিবর্তন করে আবার সংরক্ষণ করা যাবে।`,"success");
 }
-
-    async function loadStoreCount() {
-      const total = document.getElementById("totalStores");
-      if (!total || !db) return;
-
-      try {
-        const { count, error } = await db
-          .from("stores")
-          .select("*", { count: "exact", head: true });
-
-        if (error) throw error;
-        total.textContent = count ?? 0;
-      } catch (error) {
-        console.error("Store count error:", error);
-        total.textContent = "—";
-      }
-    }
-
-    function renderPlaceholder(pageKey) {
-      const page = pages[pageKey];
-      content.innerHTML = `
-        <section class="panel">
-          <h3>${escapeHtml(page[0])}</h3>
-          <p>${escapeHtml(page[1])}</p>
-          <p class="muted">এই মডিউলের পূর্ণ ফর্ম, ডেটাবেস সংরক্ষণ এবং রিপোর্টিং লজিক এখনও যোগ করা হয়নি।</p>
-        </section>`;
-    }
-
-    function navigate(pageKey) {
-      if (!pages[pageKey]) return;
-
-      currentPage = pageKey;
-      title.textContent = pages[pageKey][0];
-
-      menu.querySelectorAll("button[data-page]").forEach(button => {
-        const active = button.dataset.page === pageKey;
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-current", active ? "page" : "false");
-      });
-
-      if (pageKey === "home") renderHome();
-      else if (pageKey === "stores") renderStores();
-        else if (pageKey === "products") renderProducts();
-      else renderPlaceholder(pageKey);
-    }
-
-    menu.addEventListener("click", event => {
-      const button = event.target.closest("button[data-page]");
-      if (!button) return;
-      navigate(button.dataset.page);
-    });
-
-    async function start() {
-      if (!window.supabase || !window.supabase.createClient) {
-        connectionStatus.textContent = "Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।";
-        connectionStatus.className = "status message error";
-        navigate("home");
-        return;
-      }
-
-      try {
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        const { error } = await db.from("stores").select("id").limit(1);
-
-        if (error) {
-          connectionStatus.textContent = "ডেটাবেস সংযোগে সমস্যা: " + error.message;
-          connectionStatus.className = "status message error";
-        } else {
-          connectionStatus.textContent = "Supabase সংযোগ সফল।";
-          connectionStatus.className = "status message success";
-        }
-      } catch (error) {
-        console.error("Supabase connection error:", error);
-        connectionStatus.textContent = "সংযোগে সমস্যা হয়েছে: " + (error.message || "অজানা সমস্যা");
-        connectionStatus.className = "status message error";
-      }
-
-      navigate("home");
-    }
-
-    start();
-  })();
-  </script>
-</body>
-</html>
+function pageShellForDaily(rows,date,vid){
+ $("dailyEntryArea").innerHTML=`<section class="panel"><h3>দোকানভিত্তিক বিক্রি ও আদায় — ${esc(date)} | ${esc(vehicleLabel(vehicles.find(v=>String(v.id)===String(vid))||{}))}</h3><p class="muted small">আজকের আদায় = আজকের বিক্রির টাকা থেকে আদায়। পুরনো বাকি আদায় আলাদা ঘরে লিখবেন। কার্টন/পিস এখানে প্রয়োজন নেই।</p><div class="table-wrap"><table id="dailyTable"><thead><tr><th>দোকান</th><th>আজকের বিক্রি (৳)</th><th>আজকের বিক্রি থেকে আদায় (৳)</th><th>পুরনো বাকি আদায় (৳)</th><th>আজ নতুন বাকি (৳)</th><th>মোট নগদ (৳)</th><th>নোট</th></tr></thead><tbody>${rows||'<tr><td colspan="7">দোকান যোগ করুন</td></tr>'}</tbody><tfoot><tr><th>মোট</th><th id="sumSales">৳ 0.00</th><th id="sumToday">৳ 0.00</th><th id="sumOld">৳ 0.00</th><th id="sumDue">৳ 0.00</th><th id="sumCash">৳ 0.00</th><th></th></tr></tfoot></table></div><div class="summary"><span>আজকের মোট বিক্রি: <b id="sumSales2">৳ 0.00</b></span><span>মোট নগদ জমা হওয়ার কথা: <b id="sumCash2">৳ 0.00</b></span></div><div class="actions no-print"><button class="primary" id="saveDailyBtn">দৈনিক হিসাব সংরক্ষণ / সংশোধন</button><button class="secondary" id="cancelEditBtn">ফর্ম খালি করুন</button></div><div id="saveDailyMsg" class="message"></div></section>`;
+ $("dailyTable").addEventListener("input",updateDailyTotals);$("saveDailyBtn").addEventListener("click",saveDaily);$("cancelEditBtn").addEventListener("click",()=>{editingDate=null;editingVehicle=null;navigate("daily")});updateDailyTotals();
+}
+function updateDailyTotals(){let sales=0,todayC=0,oldC=0,due=0,cash=0;document.querySelectorAll("#dailyTable tbody tr[data-store]").forEach(tr=>{const s=num(tr.querySelector(".sale").value),t=num(tr.querySelector(".todayCash").value),o=num(tr.querySelector(".oldCash").value);sales+=s;todayC+=t;oldC+=o;due+=s-t;cash+=t+o;tr.querySelector(".newDue").textContent=money(s-t);tr.querySelector(".totalCash").textContent=money(t+o)});[["sumSales",sales],["sumToday",todayC],["sumOld",oldC],["sumDue",due],["sumCash",cash],["sumSales2",sales],["sumCash2",cash]].forEach(([id,v])=>{const el=$(id);if(el)el.textContent=money(v)})}
+async function saveDaily(){
+ const date=$("entryDate").value,vid=$("entryVehicle").value;if(!date||!vid){msg("saveDailyMsg","তারিখ ও ড্রাইভার নির্বাচন করুন।","error");return}
+ const rows=[...document.querySelectorAll("#dailyTable tbody tr[data-store]")];const payload=rows.map(tr=>({id:tr.dataset.id||null,entry_date:date,vehicle_id:Number(vid),store_id:Number(tr.dataset.store),sales_amount:num(tr.querySelector(".sale").value),today_collection:num(tr.querySelector(".todayCash").value),old_due_collection:num(tr.querySelector(".oldCash").value),notes:tr.querySelector(".note").value.trim()||null})).filter(r=>r.sales_amount||r.today_collection||r.old_due_collection||r.notes||r.id);
+ for(const r of payload){if(r.today_collection>r.sales_amount){msg("saveDailyMsg","কোনো দোকানে আজকের বিক্রি থেকে আদায় বিক্রির চেয়ে বেশি হতে পারবে না।","error");return}if(r.sales_amount<0||r.today_collection<0||r.old_due_collection<0){msg("saveDailyMsg","টাকার অঙ্ক ঋণাত্মক হতে পারবে না।","error");return}}
+ if(!payload.length){msg("saveDailyMsg","সংরক্ষণের মতো কোনো তথ্য নেই।","error");return}
+ const updates=payload.filter(r=>r.id).map(({id,...r})=>({id,...r})), inserts=payload.filter(r=>!r.id).map(({id,...r})=>r);
+ try{
+  if(updates.length){const {error}=await db.from("daily_shop_entries").upsert(updates,{onConflict:"id"});if(error)throw error}
+  if(inserts.length){const {error}=await db.from("daily_shop_entries").upsert(inserts,{onConflict:"entry_date,vehicle_id,store_id"});if(error)throw error}
+  msg("saveDailyMsg",`সংরক্ষণ সফল। ${payload.length}টি দোকানের এন্ট্রি রাখা হয়েছে। পরে একই তারিখ ও ড্রাইভার খুলে সংশোধন করা যাবে।`,"success");await loadHistory();
+ }catch(e){msg("saveDailyMsg","সংরক্ষণ হয়নি: "+e.message+" — SQL সেটআপ ও RLS নীতি ঠিক আছে কি না দেখুন।","error");console.error(e)}
+}
+async function loadHistory(){
+ const from=$("historyFrom")?.value||today().slice(0,8)+"01",to=$("historyTo")?.value||today(),vid=$("historyVehicle")?.value||"";
+ let q=db.from("daily_shop_entries").select("*").gte("entry_date",from).lte("entry_date",to).order("entry_date",{ascending:false}).order("vehicle_id");
+ if(vid)q=q.eq("vehicle_id",vid);
+ const {data,error}=await q;if(error){$("historyArea").innerHTML=`<div class="message error">${esc(error.message)}</div>`;return}
+ const grouped=new Map();(data||[]).forEach(r=>{const k=r.entry_date+"|"+r.vehicle_id;if(!grouped.has(k))grouped.set(k,{date:r.entry_date,vid:r.vehicle_id,rows:[],sales:0,today:0,old:0,cash:0});const g=grouped.get(k);g.rows.push(r);g.sales+=num(r.sales_amount);g.today+=num(r.today_collection);g.old+=num(r.old_due_collection);g.cash+=num(r.today_collection)+num(r.old_due_collection)});
+ const names=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)]));
+ $("historyArea").innerHTML=`<div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>ড্রাইভার</th><th>মোট বিক্রি</th><th>আজকের বিক্রি আদায়</th><th>পুরনো বাকি আদায়</th><th>মোট নগদ</th><th>কাজ</th></tr></thead><tbody>${[...grouped.values()].map(g=>`<tr><td>${esc(g.date)}</td><td>${esc(names.get(String(g.vid))||("#"+g.vid))}</td><td>${money(g.sales)}</td><td>${money(g.today)}</td><td>${money(g.old)}</td><td>${money(g.cash)}</td><td><button class="secondary" onclick="window.editDaily('${g.date}','${g.vid}')">খুলুন / সংশোধন</button></td></tr>`).join("")||'<tr><td colspan="7">এই সময়ের কোনো হিসাব নেই।</td></tr>'}</tbody></table></div><p class="small muted">মোট নগদ = আজকের বিক্রি থেকে আদায় + পুরনো বাকি আদায়। পুরনো বাকি আদায় বিক্রি হিসেবে গণনা হয় না।</p>`;
+}
+async function renderReports(){
+ pageShell(`<section class="panel"><h3>দৈনিক / মাসিক / তারিখভিত্তিক রিপোর্ট</h3><div class="form-grid"><div><label>তারিখ থেকে</label><input type="date" id="reportFrom" value="${today().slice(0,8)}01"></div><div><label>তারিখ পর্যন্ত</label><input type="date" id="reportTo" value="${today()}"></div><div><label>ড্রাইভার</label><select id="reportVehicle"><option value="">সব ড্রাইভার</option>${vehicleOptions().replace('<option value="">ড্রাইভার নির্বাচন করুন</option>','')}</select></div><div><button class="primary" id="runReport">রিপোর্ট দেখান</button></div></div><div id="reportArea"></div></section>`);
+ $("runReport").addEventListener("click",runReport);await runReport();
+}
+async function runReport(){
+ const from=$("reportFrom").value,to=$("reportTo").value,vid=$("reportVehicle").value;
+ let q=db.from("daily_shop_entries").select("*").gte("entry_date",from).lte("entry_date",to).order("entry_date");
+ if(vid)q=q.eq("vehicle_id",vid);const {data,error}=await q;if(error){$("reportArea").innerHTML=`<div class="message error">${esc(error.message)}</div>`;return}
+ const rows=data||[],sales=rows.reduce((a,r)=>a+num(r.sales_amount),0),todayC=rows.reduce((a,r)=>a+num(r.today_collection),0),oldC=rows.reduce((a,r)=>a+num(r.old_due_collection),0),cash=todayC+oldC;
+ const byDriver=new Map();rows.forEach(r=>{const k=String(r.vehicle_id);if(!byDriver.has(k))byDriver.set(k,{sales:0,today:0,old:0,shops:new Set()});const x=byDriver.get(k);x.sales+=num(r.sales_amount);x.today+=num(r.today_collection);x.old+=num(r.old_due_collection);x.shops.add(String(r.store_id))});
+ const byStore=new Map();rows.forEach(r=>{const k=String(r.store_id);if(!byStore.has(k))byStore.set(k,{sales:0,today:0,old:0});const x=byStore.get(k);x.sales+=num(r.sales_amount);x.today+=num(r.today_collection);x.old+=num(r.old_due_collection)});
+ const vNames=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)])),sNames=new Map(stores.map(s=>[String(s.id),s.store_name]));
+ $("reportArea").innerHTML=`<div class="summary"><span>মোট বিক্রি: <b>${money(sales)}</b></span><span>আজকের বিক্রি আদায়: <b>${money(todayC)}</b></span><span>পুরনো বাকি আদায়: <b>${money(oldC)}</b></span><span>মোট নগদ আদায়: <b>${money(cash)}</b></span><span>নতুন বাকি: <b>${money(sales-todayC)}</b></span></div><h3>ড্রাইভার অনুযায়ী</h3><div class="table-wrap"><table><thead><tr><th>ড্রাইভার</th><th>বিক্রি</th><th>আজকের বিক্রি আদায়</th><th>পুরনো বাকি আদায়</th><th>মোট নগদ</th></tr></thead><tbody>${[...byDriver].map(([k,x])=>`<tr><td>${esc(vNames.get(k)||("#"+k))}</td><td>${money(x.sales)}</td><td>${money(x.today)}</td><td>${money(x.old)}</td><td>${money(x.today+x.old)}</td></tr>`).join("")||'<tr><td colspan="5">তথ্য নেই</td></tr>'}</tbody></table></div><h3>দোকান অনুযায়ী</h3><div class="table-wrap"><table><thead><tr><th>দোকান</th><th>বিক্রি</th><th>আজকের বিক্রি আদায়</th><th>পুরনো বাকি আদায়</th><th>এই সময়ের নতুন বাকি</th></tr></thead><tbody>${[...byStore].map(([k,x])=>`<tr><td>${esc(sNames.get(k)||("#"+k))}</td><td>${money(x.sales)}</td><td>${money(x.today)}</td><td>${money(x.old)}</td><td>${money(x.sales-x.today)}</td></tr>`).join("")||'<tr><td colspan="5">তথ্য নেই</td></tr>'}</tbody></table></div><h3>প্রতিদিনের হিসাব</h3><div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>ড্রাইভার</th><th>দোকান</th><th>বিক্রি</th><th>আজকের আদায়</th><th>পুরনো বাকি আদায়</th><th>মোট নগদ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.entry_date)}</td><td>${esc(vNames.get(String(r.vehicle_id))||("#"+r.vehicle_id))}</td><td>${esc(sNames.get(String(r.store_id))||("#"+r.store_id))}</td><td>${money(r.sales_amount)}</td><td>${money(r.today_collection)}</td><td>${money(r.old_due_collection)}</td><td>${money(num(r.today_collection)+num(r.old_due_collection))}</td></tr>`).join("")||'<tr><td colspan="7">তথ্য নেই</td></tr>'}</tbody></table></div><p class="small muted">এই রিপোর্টে পুরনো বাকি আদায়কে নতুন বিক্রি হিসেবে ধরা হয়নি। এটি বিক্রি ও আদায়ের রিপোর্ট; পণ্যের ক্রয়মূল্য, ক্ষতি ও অন্যান্য খরচ যোগ না করা পর্যন্ত এটি প্রকৃত লাভ-ক্ষতির রিপোর্ট নয়।</p>`;
+}
+function renderVehicles(){pageShell(`<section class="panel"><h3>গাড়ি / ড্রাইভার তালিকা</h3><p>নতুন ড্রাইভার যোগ করতে Supabase-এর <b>vehicles</b> টেবিলে নতুন row যোগ করুন এবং সক্রিয় রাখুন। দৈনিক হিসাবের ড্রপডাউনে সক্রিয় গাড়ি/ড্রাইভারগুলো দেখাবে।</p><div class="table-wrap"><table><thead><tr><th>ID</th><th>নাম</th><th>রেজিস্ট্রেশন</th><th>সক্রিয়</th></tr></thead><tbody>${vehicles.map(v=>`<tr><td>${esc(v.id)}</td><td>${esc(vehicleLabel(v))}</td><td>${esc(v.registration_number||v.registration_num||"—")}</td><td>${v.is_active===false?"না":"হ্যাঁ"}</td></tr>`).join("")||'<tr><td colspan="4">কোনো সক্রিয় গাড়ি/ড্রাইভার পাওয়া যায়নি।</td></tr>'}</tbody></table></div><p class="small muted">যদি নামের বদলে “ড্রাইভার/গাড়ি #1” দেখায়, vehicles টেবিলের নামের কলামটি কী নামে আছে তা জানাতে হবে।</p></section>`)}
+function renderSimple(key){const names={products:"পণ্য",stock:"গোডাউন স্টক",expenses:"খরচ",partners:"অংশীদার"};pageShell(`<section class="panel"><h3>${names[key]||key}</h3><p>এই মডিউলের পূর্ণ ফর্ম পরের ধাপে যুক্ত হবে। বর্তমানে চালু আছে দোকান, ড্রাইভার/গাড়ি নির্বাচন, দোকানভিত্তিক দৈনিক বিক্রি-আদায়, সংরক্ষিত হিসাব সংশোধন এবং রিপোর্ট।</p></section>`)}
+window.goPage=k=>navigate(k);window.editDaily=(date,vid)=>{editingDate=date;editingVehicle=vid;navigate("daily")};
+async function startApp(){try{await loadBaseData();setStatus("Supabase সংযোগ সফল।","success");await navigate("home")}catch(e){setStatus("সংযোগ/টেবিল সমস্যা: "+e.message,"error");console.error(e)}}
+async function init(){if(!window.supabase?.createClient){setStatus("Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট পরীক্ষা করুন।","error");return}db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);db.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT")authState()});await authState()}
+init();
+})();
+</script>
+</body></html>
