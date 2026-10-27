@@ -31,7 +31,7 @@ button.primary{background:var(--blue);color:#fff}button.secondary{background:#e8
 <div id="appArea" class="layout hidden">
 <nav id="menu">
 <button class="active" data-page="home">🏠 ড্যাশবোর্ড</button><button data-page="stores">🏪 দোকান</button>
-<button data-page="daily">🧾 ড্রাইভারের দৈনিক হিসাব</button><button data-page="reports">📊 দৈনিক/মাসিক রিপোর্ট</button>
+<button data-page="daily">🧾 ড্রাইভারের দৈনিক হিসাব</button><button data-page="settlement">💵 ক্যাশ সেটেলমেন্ট</button><button data-page="reports">📊 দৈনিক/মাসিক রিপোর্ট</button>
 <button data-page="products">🍦 পণ্য</button><button data-page="stock">📦 গোডাউন স্টক</button><button data-page="vehicles">🚚 গাড়ি/ড্রাইভার</button>
 <button data-page="expenses">💳 খরচ</button><button data-page="partners">🤝 অংশীদার</button><button id="logoutButton">🚪 লগআউট</button>
 </nav>
@@ -74,7 +74,7 @@ async function loadBaseData(){
 function vehicleLabel(v){return v.vehicle_name||v.driver_name||v.name||v.registration_number||v.registration_num||v.title||("ড্রাইভার/গাড়ি #"+v.id)}
 function vehicleOptions(selected=""){return `<option value="">ড্রাইভার নির্বাচন করুন</option>`+vehicles.map(v=>`<option value="${v.id}" ${String(selected)===String(v.id)?"selected":""}>${esc(vehicleLabel(v))}</option>`).join("")}
 function storeOptions(){return stores.map(s=>`<option value="${s.id}">${esc(s.store_name)}${s.owner_name?" — "+esc(s.owner_name):""}</option>`).join("")}
-async function navigate(key){currentPage=key;const labels={home:"ড্যাশবোর্ড",stores:"দোকান",daily:"ড্রাইভারের দৈনিক হিসাব",reports:"দৈনিক/মাসিক রিপোর্ট",products:"পণ্য",stock:"গোডাউন স্টক",vehicles:"গাড়ি/ড্রাইভার",expenses:"খরচ",partners:"অংশীদার"};title.textContent=labels[key]||"হিসাব";document.querySelectorAll("#menu button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===key));try{await loadBaseData();if(key==="home")await renderHome();else if(key==="stores")await renderStores();else if(key==="daily")await renderDaily();else if(key==="reports")await renderReports();else if(key==="vehicles")renderVehicles();else renderSimple(key);setStatus("Supabase সংযোগ সফল।","success")}catch(e){pageShell(`<section class="panel"><div class="message error">${esc(e.message)}</div><p>Supabase টেবিল/কলামের নাম ও RLS অনুমতি যাচাই করুন।</p></section>`);setStatus("ডেটা লোডে সমস্যা: "+e.message,"error");console.error(e)}}
+async function navigate(key){currentPage=key;const labels={home:"ড্যাশবোর্ড",stores:"দোকান",daily:"ড্রাইভারের দৈনিক হিসাব",reports:"দৈনিক/মাসিক রিপোর্ট",settlement:"ড্রাইভারের ক্যাশ সেটেলমেন্ট",products:"পণ্য",stock:"গোডাউন স্টক",vehicles:"গাড়ি/ড্রাইভার",expenses:"খরচ",partners:"অংশীদার"};title.textContent=labels[key]||"হিসাব";document.querySelectorAll("#menu button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===key));try{await loadBaseData();if(key==="home")await renderHome();else if(key==="stores")await renderStores();else if(key==="daily")await renderDaily();else if(key==="reports")await renderReports();else if(key==="settlement")await renderSettlement();else if(key==="vehicles")renderVehicles();else renderSimple(key);setStatus("Supabase সংযোগ সফল।","success")}catch(e){pageShell(`<section class="panel"><div class="message error">${esc(e.message)}</div><p>Supabase টেবিল/কলামের নাম ও RLS অনুমতি যাচাই করুন।</p></section>`);setStatus("ডেটা লোডে সমস্যা: "+e.message,"error");console.error(e)}}
 async function renderHome(){
  const {data,error}=await db.from("daily_shop_entries").select("entry_date,sales_amount,today_collection,old_due_collection");
  if(error)throw error;
@@ -147,9 +147,87 @@ async function runReport(){
  const vNames=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)])),sNames=new Map(stores.map(s=>[String(s.id),s.store_name]));
  $("reportArea").innerHTML=`<div class="summary"><span>মোট বিক্রি: <b>${money(sales)}</b></span><span>আজকের বিক্রি আদায়: <b>${money(todayC)}</b></span><span>পুরনো বাকি আদায়: <b>${money(oldC)}</b></span><span>মোট নগদ আদায়: <b>${money(cash)}</b></span><span>নতুন বাকি: <b>${money(sales-todayC)}</b></span></div><h3>ড্রাইভার অনুযায়ী</h3><div class="table-wrap"><table><thead><tr><th>ড্রাইভার</th><th>বিক্রি</th><th>আজকের বিক্রি আদায়</th><th>পুরনো বাকি আদায়</th><th>মোট নগদ</th></tr></thead><tbody>${[...byDriver].map(([k,x])=>`<tr><td>${esc(vNames.get(k)||("#"+k))}</td><td>${money(x.sales)}</td><td>${money(x.today)}</td><td>${money(x.old)}</td><td>${money(x.today+x.old)}</td></tr>`).join("")||'<tr><td colspan="5">তথ্য নেই</td></tr>'}</tbody></table></div><h3>দোকান অনুযায়ী</h3><div class="table-wrap"><table><thead><tr><th>দোকান</th><th>বিক্রি</th><th>আজকের বিক্রি আদায়</th><th>পুরনো বাকি আদায়</th><th>এই সময়ের নতুন বাকি</th></tr></thead><tbody>${[...byStore].map(([k,x])=>`<tr><td>${esc(sNames.get(k)||("#"+k))}</td><td>${money(x.sales)}</td><td>${money(x.today)}</td><td>${money(x.old)}</td><td>${money(x.sales-x.today)}</td></tr>`).join("")||'<tr><td colspan="5">তথ্য নেই</td></tr>'}</tbody></table></div><h3>প্রতিদিনের হিসাব</h3><div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>ড্রাইভার</th><th>দোকান</th><th>বিক্রি</th><th>আজকের আদায়</th><th>পুরনো বাকি আদায়</th><th>মোট নগদ</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.entry_date)}</td><td>${esc(vNames.get(String(r.vehicle_id))||("#"+r.vehicle_id))}</td><td>${esc(sNames.get(String(r.store_id))||("#"+r.store_id))}</td><td>${money(r.sales_amount)}</td><td>${money(r.today_collection)}</td><td>${money(r.old_due_collection)}</td><td>${money(num(r.today_collection)+num(r.old_due_collection))}</td></tr>`).join("")||'<tr><td colspan="7">তথ্য নেই</td></tr>'}</tbody></table></div><p class="small muted">এই রিপোর্টে পুরনো বাকি আদায়কে নতুন বিক্রি হিসেবে ধরা হয়নি। এটি বিক্রি ও আদায়ের রিপোর্ট; পণ্যের ক্রয়মূল্য, ক্ষতি ও অন্যান্য খরচ যোগ না করা পর্যন্ত এটি প্রকৃত লাভ-ক্ষতির রিপোর্ট নয়।</p>`;
 }
+
+async function renderSettlement(){
+ const defaultDate=today();
+ pageShell(`<section class="panel">
+ <h3>দৈনিক ক্যাশ সেটেলমেন্ট</h3>
+ <p class="muted">প্রথমে তারিখ ও গাড়ি/ড্রাইভার নির্বাচন করুন। দৈনিক হিসাব থেকে আদায়ের টাকা নিজে থেকে আসবে। এরপর মেরামত, ছাড় ও নষ্ট পণ্যের ক্রয়মূল্য লিখুন।</p>
+ <div class="form-grid">
+  <div><label>তারিখ *</label><input type="date" id="settleDate" value="${defaultDate}"></div>
+  <div><label>ড্রাইভার/গাড়ি *</label><select id="settleVehicle">${vehicleOptions()}</select></div>
+  <div><button class="primary" id="loadSettlement">হিসাব লোড করুন</button></div>
+ </div>
+ <div id="settleMsg" class="message">তারিখ ও ড্রাইভার নির্বাচন করে “হিসাব লোড করুন” চাপুন।</div>
+ <div id="settleFormArea"></div>
+ </section>
+ <section class="panel"><h3>আগের ক্যাশ সেটেলমেন্ট</h3>
+ <div class="form-grid"><div><label>তারিখ থেকে</label><input type="date" id="settleFrom" value="${defaultDate.slice(0,8)}01"></div><div><label>তারিখ পর্যন্ত</label><input type="date" id="settleTo" value="${defaultDate}"></div><div><label>ড্রাইভার</label><select id="settleFilter"><option value="">সব ড্রাইভার</option>${vehicleOptions().replace('<option value="">ড্রাইভার নির্বাচন করুন</option>','')}</select></div><div><button class="secondary" id="loadSettlementHistory">ইতিহাস দেখান</button></div></div>
+ <div id="settleHistory"></div></section>`);
+ $("loadSettlement").addEventListener("click",loadSettlementForm);
+ $("loadSettlementHistory").addEventListener("click",loadSettlementHistory);
+ await loadSettlementHistory();
+}
+async function loadSettlementForm(){
+ const date=$("settleDate").value, vid=$("settleVehicle").value;
+ if(!date||!vid){msg("settleMsg","তারিখ ও ড্রাইভার নির্বাচন করুন।","error");return}
+ try{
+  const [daily,existing]=await Promise.all([
+   db.from("daily_shop_entries").select("today_collection,old_due_collection").eq("entry_date",date).eq("vehicle_id",vid),
+   db.from("driver_settlements").select("*").eq("settlement_date",date).eq("vehicle_id",vid).maybeSingle()
+  ]);
+  if(daily.error)throw daily.error;if(existing.error)throw existing.error;
+  const rows=daily.data||[];
+  const cash=rows.reduce((a,r)=>a+num(r.today_collection)+num(r.old_due_collection),0);
+  const r=existing.data||{};
+  $("settleFormArea").innerHTML=`<div class="summary"><span>আজকের বিক্রির আদায়: <b>${money(rows.reduce((a,x)=>a+num(x.today_collection),0))}</b></span><span>পুরনো বাকি আদায়: <b>${money(rows.reduce((a,x)=>a+num(x.old_due_collection),0))}</b></span><span>মোট নগদ আদায়: <b id="settleCash">${money(cash)}</b></span></div>
+  <div class="form-grid">
+   <div><label>গাড়ি মেরামত (৳)</label><input id="repairCost" type="number" min="0" step=".01" value="${num(r.repair_cost)}"></div>
+   <div><label>ছাড় (৳)</label><input id="discountAmount" type="number" min="0" step=".01" value="${num(r.discount_amount)}"></div>
+   <div><label>নষ্ট আইসক্রিমের ক্রয়মূল্য (৳)</label><input id="damagedCost" type="number" min="0" step=".01" value="${num(r.damaged_goods_cost)}"></div>
+   <div><label>ড্রাইভার বাস্তবে জমা দিয়েছে (৳)</label><input id="actualDeposit" type="number" min="0" step=".01" value="${num(r.actual_deposit)}"></div>
+   <div><label>নোট</label><input id="settleNotes" value="${esc(r.notes||"")}" placeholder="মেরামতের বিবরণ ইত্যাদি"></div>
+  </div>
+  <div class="summary"><span>জমা দেওয়ার কথা: <b id="expectedDeposit">${money(cash-num(r.repair_cost)-num(r.discount_amount)-num(r.damaged_goods_cost))}</b></span><span>পার্থক্য (বাস্তব জমা − জমা দেওয়ার কথা): <b id="settleDifference">${money(num(r.actual_deposit)-(cash-num(r.repair_cost)-num(r.discount_amount)-num(r.damaged_goods_cost)))}</b></span></div>
+  <div class="actions no-print"><button class="primary" id="saveSettlement">ক্যাশ সেটেলমেন্ট সংরক্ষণ</button></div><div id="saveSettleMsg" class="message"></div>
+  <p class="small muted">ধনাত্মক পার্থক্য = বেশি জমা, ঋণাত্মক পার্থক্য = কম জমা। নষ্ট পণ্যের মূল্য ক্রয়মূল্যে লিখুন।</p>`;
+  $("settleFormArea").dataset.cash=String(cash);
+  ["repairCost","discountAmount","damagedCost","actualDeposit"].forEach(id=>$(id).addEventListener("input",updateSettlementTotals));
+  $("saveSettlement").addEventListener("click",saveSettlement);
+  msg("settleMsg",`দৈনিক হিসাব থেকে ${rows.length}টি দোকানের এন্ট্রি পাওয়া গেছে। ${existing.data?"আগের সেটেলমেন্ট লোড হয়েছে; পরিবর্তন করে সংরক্ষণ করতে পারবেন.":"নতুন সেটেলমেন্ট তৈরি করুন."}`,"success");
+ }catch(e){msg("settleMsg","হিসাব লোড হয়নি: "+e.message,"error");console.error(e)}
+}
+function updateSettlementTotals(){
+ const cash=num($("settleFormArea").dataset.cash), repair=num($("repairCost")?.value), discount=num($("discountAmount")?.value), damaged=num($("damagedCost")?.value), actual=num($("actualDeposit")?.value);
+ const expected=cash-repair-discount-damaged,diff=actual-expected;
+ if($("expectedDeposit"))$("expectedDeposit").textContent=money(expected);
+ if($("settleDifference"))$("settleDifference").textContent=money(diff);
+}
+async function saveSettlement(){
+ const date=$("settleDate").value,vid=$("settleVehicle").value,cash=num($("settleFormArea").dataset.cash);
+ const repair=num($("repairCost").value),discount=num($("discountAmount").value),damaged=num($("damagedCost").value),actual=num($("actualDeposit").value);
+ if([repair,discount,damaged,actual].some(x=>x<0)){msg("saveSettleMsg","টাকার অঙ্ক ঋণাত্মক হতে পারবে না।","error");return}
+ const expected=cash-repair-discount-damaged;
+ if(expected<0){msg("saveSettleMsg","খরচ, ছাড় ও নষ্ট পণ্যের মোট মূল্য মোট নগদ আদায়ের চেয়ে বেশি। অঙ্কগুলো যাচাই করুন।","error");return}
+ const row={settlement_date:date,vehicle_id:Number(vid),total_cash_collected:cash,repair_cost:repair,discount_amount:discount,damaged_goods_cost:damaged,expected_deposit:expected,actual_deposit:actual,difference:actual-expected,notes:$("settleNotes").value.trim()||null};
+ const {error}=await db.from("driver_settlements").upsert(row,{onConflict:"settlement_date,vehicle_id"});
+ if(error){msg("saveSettleMsg","সংরক্ষণ হয়নি: "+error.message,"error");return}
+ msg("saveSettleMsg","ক্যাশ সেটেলমেন্ট সংরক্ষণ হয়েছে। একই তারিখ ও ড্রাইভার খুলে পরে সংশোধন করা যাবে।","success");
+ await loadSettlementHistory();
+}
+async function loadSettlementHistory(){
+ const from=$("settleFrom")?.value||today().slice(0,8)+"01",to=$("settleTo")?.value||today(),vid=$("settleFilter")?.value||"";
+ let q=db.from("driver_settlements").select("*").gte("settlement_date",from).lte("settlement_date",to).order("settlement_date",{ascending:false});
+ if(vid)q=q.eq("vehicle_id",vid);
+ const {data,error}=await q;
+ if(error){if($("settleHistory"))$("settleHistory").innerHTML=`<div class="message error">${esc(error.message)}</div>`;return}
+ const names=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)]));
+ $("settleHistory").innerHTML=`<div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>ড্রাইভার</th><th>মোট আদায়</th><th>মেরামত</th><th>ছাড়</th><th>নষ্ট পণ্য</th><th>জমা দেওয়ার কথা</th><th>বাস্তব জমা</th><th>পার্থক্য</th><th>কাজ</th></tr></thead><tbody>${(data||[]).map(r=>`<tr><td>${esc(r.settlement_date)}</td><td>${esc(names.get(String(r.vehicle_id))||("#"+r.vehicle_id))}</td><td>${money(r.total_cash_collected)}</td><td>${money(r.repair_cost)}</td><td>${money(r.discount_amount)}</td><td>${money(r.damaged_goods_cost)}</td><td>${money(r.expected_deposit)}</td><td>${money(r.actual_deposit)}</td><td>${money(r.difference)}</td><td><button class="secondary" onclick="window.editSettlement('${r.settlement_date}','${r.vehicle_id}')">খুলুন / সংশোধন</button></td></tr>`).join("")||'<tr><td colspan="10">এই সময়ের কোনো সেটেলমেন্ট নেই।</td></tr>'}</tbody></table></div>`;
+}
+
 function renderVehicles(){pageShell(`<section class="panel"><h3>গাড়ি / ড্রাইভার তালিকা</h3><p>নতুন ড্রাইভার যোগ করতে Supabase-এর <b>vehicles</b> টেবিলে নতুন row যোগ করুন এবং সক্রিয় রাখুন। দৈনিক হিসাবের ড্রপডাউনে সক্রিয় গাড়ি/ড্রাইভারগুলো দেখাবে।</p><div class="table-wrap"><table><thead><tr><th>ID</th><th>নাম</th><th>রেজিস্ট্রেশন</th><th>সক্রিয়</th></tr></thead><tbody>${vehicles.map(v=>`<tr><td>${esc(v.id)}</td><td>${esc(vehicleLabel(v))}</td><td>${esc(v.registration_number||v.registration_num||"—")}</td><td>${v.is_active===false?"না":"হ্যাঁ"}</td></tr>`).join("")||'<tr><td colspan="4">কোনো সক্রিয় গাড়ি/ড্রাইভার পাওয়া যায়নি।</td></tr>'}</tbody></table></div><p class="small muted">যদি নামের বদলে “ড্রাইভার/গাড়ি #1” দেখায়, vehicles টেবিলের নামের কলামটি কী নামে আছে তা জানাতে হবে।</p></section>`)}
 function renderSimple(key){const names={products:"পণ্য",stock:"গোডাউন স্টক",expenses:"খরচ",partners:"অংশীদার"};pageShell(`<section class="panel"><h3>${names[key]||key}</h3><p>এই মডিউলের পূর্ণ ফর্ম পরের ধাপে যুক্ত হবে। বর্তমানে চালু আছে দোকান, ড্রাইভার/গাড়ি নির্বাচন, দোকানভিত্তিক দৈনিক বিক্রি-আদায়, সংরক্ষিত হিসাব সংশোধন এবং রিপোর্ট।</p></section>`)}
-window.goPage=k=>navigate(k);window.editDaily=(date,vid)=>{editingDate=date;editingVehicle=vid;navigate("daily")};
+window.goPage=k=>navigate(k);window.editSettlement=(date,vid)=>{navigate("settlement").then(()=>{ $("settleDate").value=date; $("settleVehicle").value=vid; loadSettlementForm(); });};window.editDaily=(date,vid)=>{editingDate=date;editingVehicle=vid;navigate("daily")};
 async function startApp(){try{await loadBaseData();setStatus("Supabase সংযোগ সফল।","success");await navigate("home")}catch(e){setStatus("সংযোগ/টেবিল সমস্যা: "+e.message,"error");console.error(e)}}
 async function init(){if(!window.supabase?.createClient){setStatus("Supabase লাইব্রেরি লোড হয়নি। ইন্টারনেট পরীক্ষা করুন।","error");return}db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);db.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT")authState()});await authState()}
 init();
