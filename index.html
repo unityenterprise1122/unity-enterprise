@@ -188,7 +188,7 @@ async function loadSettlementForm(){
    <div><label>ড্রাইভার বাস্তবে জমা দিয়েছে (৳)</label><input id="actualDeposit" type="number" min="0" step=".01" value="${num(r.actual_deposit)}"></div>
    <div><label>নোট</label><input id="settleNotes" value="${esc(r.notes||"")}" placeholder="মেরামতের বিবরণ ইত্যাদি"></div>
   </div>
-  <div class="summary"><span>জমা দেওয়ার কথা: <b id="expectedDeposit">${money(cash-num(r.repair_cost)-num(r.discount_amount)-num(r.damaged_goods_cost))}</b></span><span>পার্থক্য (বাস্তব জমা − জমা দেওয়ার কথা): <b id="settleDifference">${money(num(r.actual_deposit)-(cash-num(r.repair_cost)-num(r.discount_amount)-num(r.damaged_goods_cost)))}</b></span></div>
+  <p class="small muted">হিসাবের নিয়ম: ছাড় ও নষ্ট আইসক্রিমের মূল্য দোকানের মেমোতেই সমন্বয় হবে। তাই আদায় করা নগদ থেকে এগুলো আবার বাদ হবে না; নগদ থেকে শুধু গাড়ি মেরামতের খরচ বাদ হবে, যদি সেটি এই নগদ থেকে দেওয়া হয়।</p><div class="summary"><span>জমা দেওয়ার কথা: <b id="expectedDeposit">${money(cash-num(r.repair_cost))}</b></span><span>পার্থক্য (বাস্তব জমা − জমা দেওয়ার কথা): <b id="settleDifference">${money(num(r.actual_deposit)-(cash-num(r.repair_cost)))}</b></span></div>
   <div class="actions no-print"><button class="primary" id="saveSettlement">ক্যাশ সেটেলমেন্ট সংরক্ষণ</button></div><div id="saveSettleMsg" class="message"></div>
   <p class="small muted">ধনাত্মক পার্থক্য = বেশি জমা, ঋণাত্মক পার্থক্য = কম জমা। নষ্ট পণ্যের মূল্য ক্রয়মূল্যে লিখুন।</p>`;
   $("settleFormArea").dataset.cash=String(cash);
@@ -207,7 +207,7 @@ async function saveSettlement(){
  const date=$("settleDate").value,vid=$("settleVehicle").value,cash=num($("settleFormArea").dataset.cash);
  const repair=num($("repairCost").value),discount=num($("discountAmount").value),damaged=num($("damagedCost").value),actual=num($("actualDeposit").value);
  if([repair,discount,damaged,actual].some(x=>x<0)){msg("saveSettleMsg","টাকার অঙ্ক ঋণাত্মক হতে পারবে না।","error");return}
- const expected=cash-repair-discount-damaged;
+ const expected=cash-repair;
  if(expected<0){msg("saveSettleMsg","খরচ, ছাড় ও নষ্ট পণ্যের মোট মূল্য মোট নগদ আদায়ের চেয়ে বেশি। অঙ্কগুলো যাচাই করুন।","error");return}
  const row={settlement_date:date,vehicle_id:Number(vid),total_cash_collected:cash,repair_cost:repair,discount_amount:discount,damaged_goods_cost:damaged,expected_deposit:expected,actual_deposit:actual,difference:actual-expected,notes:$("settleNotes").value.trim()||null};
  const {error}=await db.from("driver_settlements").upsert(row,{onConflict:"settlement_date,vehicle_id"});
