@@ -91,7 +91,42 @@ async function renderStores(){
  if(e)throw e;
  stores.forEach(s=>{const d=num(s.opening_balance)+(all||[]).filter(r=>String(r.store_id)===String(s.id)).reduce((a,r)=>a+num(r.sales_amount)-num(r.today_collection)-num(r.old_due_collection),0);const el=$("due-"+s.id);if(el)el.textContent=money(d)});
 }
-async function saveStore(e){e.preventDefault();const row={store_name:$("storeName").value.trim(),owner_name:$("storeOwner").value.trim()||null,opening_balance:num($("storeBalance").value),is_active:true};const {error}=await db.from("stores").insert(row);if(error){msg("storeMsg","সংরক্ষণ হয়নি: "+error.message,"error");return}msg("storeMsg","দোকান সংরক্ষণ হয়েছে।","success");$("storeForm").reset();$("storeBalance").value="0";await renderStores()}
+async function saveStore(e){
+  e.preventDefault();
+  const storeName=$("storeName").value.trim();
+  const ownerName=$("storeOwner").value.trim();
+  const row={store_name:storeName,owner_name:ownerName||null,opening_balance:num($("storeBalance").value),is_active:true};
+
+  if(!storeName){
+    msg("storeMsg","দোকানের নাম লিখুন।","error");
+    return;
+  }
+
+  // Warn about likely duplicates without changing or deleting any existing data.
+  const {data:matches,error:checkError}=await db.from("stores")
+    .select("id,store_name,owner_name,phone")
+    .ilike("store_name",storeName)
+    .limit(10);
+  if(checkError){
+    msg("storeMsg","দোকানের নাম যাচাই করা যায়নি: "+checkError.message+"। নিরাপত্তার জন্য সংরক্ষণ বন্ধ রাখা হয়েছে।","error");
+    return;
+  }
+  if(matches && matches.length){
+    const sameOwner=matches.some(s=>(s.owner_name||"").trim().toLocaleLowerCase()===(ownerName||"").trim().toLocaleLowerCase());
+    if(sameOwner){
+      msg("storeMsg","এই নাম ও মালিকের দোকান আগে থেকেই আছে। তালিকা যাচাই করুন; পুরোনো তথ্য মুছে ফেলা হয়নি।","error");
+      return;
+    }
+    if(!confirm("একই নামে দোকান আগে থেকেই আছে। তবুও কি নতুন দোকান যোগ করবেন?")) return;
+  }
+
+  const {error}=await db.from("stores").insert(row);
+  if(error){msg("storeMsg","সংরক্ষণ হয়নি: "+error.message,"error");return}
+  msg("storeMsg","দোকান সংরক্ষণ হয়েছে।","success");
+  $("storeForm").reset();
+  $("storeBalance").value="0";
+  await renderStores();
+}
 async function renderDaily(){
  pageShell(`<section class="panel"><h3>দৈনিক হিসাব নির্বাচন</h3><div class="form-grid"><div><label>তারিখ *</label><input type="date" id="entryDate" value="${editingDate||today()}"></div><div><label>ড্রাইভার/গাড়ি *</label><select id="entryVehicle">${vehicleOptions(editingVehicle||"")}</select></div><div><label>নোট (ঐচ্ছিক)</label><input id="entryNotes" placeholder="যেমন: সকালের রুট"></div><div><button class="primary" id="loadEntryBtn">দোকান তালিকা দেখান</button></div></div><div id="dailyMsg" class="message">তারিখ ও ড্রাইভার নির্বাচন করে “দোকান তালিকা দেখান” চাপুন।</div></section><div id="dailyEntryArea"></div><section class="panel"><h3>আগের সংরক্ষিত দৈনিক হিসাব</h3><div class="form-grid"><div><label>তারিখ থেকে</label><input type="date" id="historyFrom" value="${today().slice(0,8)}01"></div><div><label>তারিখ পর্যন্ত</label><input type="date" id="historyTo" value="${today()}"></div><div><label>ড্রাইভার</label><select id="historyVehicle"><option value="">সব ড্রাইভার</option>${vehicleOptions().replace('<option value="">ড্রাইভার নির্বাচন করুন</option>','')}</select></div><div><button class="secondary" id="historyBtn">তালিকা দেখান</button></div></div><div id="historyArea"></div></section>`);
  $("loadEntryBtn").addEventListener("click",loadDailyRows);$("historyBtn").addEventListener("click",loadHistory);
@@ -198,10 +233,14 @@ async function loadSettlementForm(){
  }catch(e){msg("settleMsg","হিসাব লোড হয়নি: "+e.message,"error");console.error(e)}
 }
 function updateSettlementTotals(){
- const cash=num($("settleFormArea").dataset.cash), repair=num($("repairCost")?.value), discount=num($("discountAmount")?.value), damaged=num($("damagedCost")?.value), actual=num($("actualDeposit")?.value);
- const expected=cash-repair-discount-damaged,diff=actual-expected;
- if($("expectedDeposit"))$("expectedDeposit").textContent=money(expected);
- if($("settleDifference"))$("settleDifference").textContent=money(diff);
+  const cash=num($("totalCash").value);
+  const repair=num($("repairCost").value);
+  const actual=num($("actualDeposit").value);
+  // Discount and damaged-goods amounts are already handled in the daily memo.
+  // Do not deduct them a second time from the cash deposit.
+  const expected=Math.max(0,cash-repair);
+  $("expectedDeposit").value=expected.toFixed(2);
+  $("difference").value=(actual-expected).toFixed(2);
 }
 async function saveSettlement(){
  const date=$("settleDate").value,vid=$("settleVehicle").value,cash=num($("settleFormArea").dataset.cash);
