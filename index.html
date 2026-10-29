@@ -233,14 +233,15 @@ async function loadSettlementForm(){
  }catch(e){msg("settleMsg","হিসাব লোড হয়নি: "+e.message,"error");console.error(e)}
 }
 function updateSettlementTotals(){
-  const cash=num($("totalCash").value);
+  // Read the cash total stored when the daily settlement form was loaded.
+  const cash=num($("settleFormArea").dataset.cash);
   const repair=num($("repairCost").value);
   const actual=num($("actualDeposit").value);
   // Discount and damaged-goods amounts are already handled in the daily memo.
-  // Do not deduct them a second time from the cash deposit.
-  const expected=Math.max(0,cash-repair);
-  $("expectedDeposit").value=expected.toFixed(2);
-  $("difference").value=(actual-expected).toFixed(2);
+  // Only repair costs paid from the collected cash reduce the expected deposit.
+  const expected=cash-repair;
+  $("expectedDeposit").textContent=money(expected);
+  $("settleDifference").textContent=money(actual-expected);
 }
 async function saveSettlement(){
  const date=$("settleDate").value,vid=$("settleVehicle").value,cash=num($("settleFormArea").dataset.cash);
