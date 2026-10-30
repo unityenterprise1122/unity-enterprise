@@ -341,6 +341,84 @@ function renderSimple(key){
   ownerfund:[["তারিখ","date"],["লেনদেনের ধরন","select:মালিকের কাছে রাখা,মালিকের কাছ থেকে ফেরত"],["পরিমাণ (৳)","number"],["নোট","text"]],
   employees:[["কর্মচারীর নাম","text"],["তারিখ","date"],["লেনদেনের ধরন","select:বেতন ধার্য,অগ্রিম,বেতন পরিশোধ,অন্যান্য পরিশোধ"],["পরিমাণ (৳)","number"],["নোট","text"]]
  };
+
+ if(key==="products" || key==="stock"){
+  const isProducts = key==="products";
+  const heading = isProducts ? "পণ্য ব্যবস্থাপনা" : "স্টক ব্যবস্থাপনা";
+  const formFields = isProducts
+   ? `<div><label>পণ্যের নাম</label><input id="pfName" required></div>
+      <div><label>ফ্লেভার</label><input id="pfFlavor" required></div>
+      <div><label>প্রতি কার্টনে পিস</label><input id="pfPieces" type="number" min="1" step="1" required></div>
+      <div><label>বিক্রয়মূল্য (৳/পিস)</label><input id="pfPrice" type="number" min="0" step="0.01" required></div>`
+   : `<div><label>তারিখ</label><input id="sfDate" type="date" value="${today()}" required></div>
+      <div><label>পণ্য</label><select id="sfProduct" required><option value="">পণ্য বাছুন</option></select></div>
+      <div><label>লেনদেনের ধরন</label><select id="sfType"><option value="opening">প্রারম্ভিক স্টক</option><option value="purchase">ক্রয়</option><option value="return">ফেরত</option><option value="damage">নষ্ট</option><option value="adjustment">সমন্বয়</option></select></div>
+      <div><label>কার্টন</label><input id="sfCartons" type="number" min="0" step="1" value="0"></div>
+      <div><label>অতিরিক্ত পিস</label><input id="sfLoose" type="number" min="0" step="1" value="0"></div>
+      <div><label>নোট</label><input id="sfNotes"></div>`;
+  pageShell(`<section class="panel"><h3>${heading}</h3>
+   <div class="form-grid"><div><label>সার্চ</label><input id="moduleSearch" placeholder="${isProducts?'পণ্যের নাম বা ফ্লেভার':'পণ্যের নাম, ফ্লেভার বা নোট'}"></div>
+   ${isProducts?'<div><label>স্ট্যাটাস</label><select id="productStatus"><option value="active">সক্রিয়</option><option value="all">সব</option><option value="inactive">নিষ্ক্রিয়</option></select></div>':'<div><label>তারিখ অনুযায়ী</label><input id="stockSearchDate" type="date"></div>'}
+   </div><div id="moduleList" class="message">তথ্য লোড হচ্ছে…</div></section>
+   <section class="panel"><h3 id="moduleFormTitle">${isProducts?'নতুন পণ্য যোগ করুন':'নতুন স্টক এন্ট্রি'}</h3>
+   <form id="moduleForm"><div class="form-grid">${formFields}</div>
+   <p class="actions"><button class="primary" type="submit">সংরক্ষণ করুন</button><button class="secondary" type="button" id="cancelEdit">নতুন এন্ট্রি</button></p></form>
+   <div id="moduleMessage" class="message">এখান থেকে নতুন এন্ট্রি, Edit ও Delete করা যাবে।</div></section>`);
+  let editingId = null, cache = [], productCache = [];
+  const setMsg=(s,c="message")=>msg("moduleMessage",s,c);
+  const resetForm=()=>{editingId=null;$("moduleForm").reset();$("moduleFormTitle").textContent=isProducts?"নতুন পণ্য যোগ করুন":"নতুন স্টক এন্ট্রি";if(!isProducts)$("sfDate").value=today();};
+  $("cancelEdit").addEventListener("click",resetForm);
+  const loadProducts=async()=>{
+   const {data,error}=await db.from("products").select("id,product_name,flavor,pieces_per_carton,sale_price_per_piece").order("product_name");
+   if(error)throw error;productCache=data||[];
+   if(!isProducts)$("sfProduct").innerHTML='<option value="">পণ্য বাছুন</option>'+productCache.map(p=>`<option value="${p.id}">${esc(p.product_name+" / "+p.flavor)}</option>`).join("");
+  };
+  const loadList=async()=>{
+   const term=($("moduleSearch").value||"").trim().toLowerCase();
+   if(isProducts){
+    let q=db.from("products").select("id,product_name,flavor,pieces_per_carton,sale_price_per_piece,is_active").order("product_name");
+    const {data,error}=await q;if(error)throw error;cache=data||[];
+    const status=$("productStatus").value;
+    const rows=cache.filter(p=>(status==="all"||(status==="active"?p.is_active!==false:p.is_active===false))&&(!term||(p.product_name+" "+p.flavor).toLowerCase().includes(term)));
+    $("moduleList").innerHTML=`<p>দেখানো হচ্ছে ${rows.length}টি / মোট ${cache.length}টি পণ্য</p><div class="table-wrap"><table><thead><tr><th>পণ্যের নাম</th><th>ফ্লেভার</th><th>কার্টনে পিস</th><th>বিক্রয়মূল্য</th><th>স্ট্যাটাস</th><th>কাজ</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.product_name)}</td><td>${esc(p.flavor)}</td><td>${p.pieces_per_carton}</td><td>${money(p.sale_price_per_piece)}</td><td>${p.is_active===false?"নিষ্ক্রিয়":"সক্রিয়"}</td><td><button type="button" onclick="editProduct(${p.id})">Edit</button> <button type="button" class="danger" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join("")||'<tr><td colspan="6">কোনো পণ্য পাওয়া যায়নি।</td></tr>'}</tbody></table></div>`;
+   }else{
+    let q=db.from("stock_movements").select("id,product_id,movement_type,quantity_pieces,movement_date,notes").order("movement_date",{ascending:false}).limit(1000);
+    const date=$("stockSearchDate").value;if(date)q=q.gte("movement_date",date+"T00:00:00").lt("movement_date",date+"T23:59:59.999");
+    const {data,error}=await q;if(error)throw error;cache=data||[];
+    const names=new Map(productCache.map(p=>[String(p.id),p]));
+    const rows=cache.filter(r=>{const p=names.get(String(r.product_id));return !term||((p?.product_name||"")+" "+(p?.flavor||"")+" "+(r.notes||"")).toLowerCase().includes(term)});
+    const labels={opening:"প্রারম্ভিক স্টক",purchase:"ক্রয়",return:"ফেরত",damage:"নষ্ট",adjustment:"সমন্বয়"};
+    $("moduleList").innerHTML=`<p>দেখানো হচ্ছে ${rows.length}টি / মোট লোড হয়েছে ${cache.length}টি স্টক এন্ট্রি</p><div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>পণ্য</th><th>ধরন</th><th>পরিমাণ</th><th>নোট</th><th>কাজ</th></tr></thead><tbody>${rows.map(r=>{const p=names.get(String(r.product_id));const pc=Number(p?.pieces_per_carton||0);const qty=Number(r.quantity_pieces||0);return `<tr><td>${esc(String(r.movement_date||"").slice(0,10))}</td><td>${esc((p?.product_name||"অজানা পণ্য")+" / "+(p?.flavor||""))}</td><td>${esc(labels[r.movement_type]||r.movement_type)}</td><td>${pc?Math.floor(qty/pc)+" কার্টন "+qty%pc+" পিস":qty+" পিস"}</td><td>${esc(r.notes||"")}</td><td><button type="button" onclick="editStock(${r.id})">Edit</button> <button type="button" class="danger" onclick="deleteStock(${r.id})">Delete</button></td></tr>`}).join("")||'<tr><td colspan="6">কোনো স্টক এন্ট্রি পাওয়া যায়নি।</td></tr>'}</tbody></table></div>`;
+   }
+  };
+  window.editProduct=async id=>{const p=cache.find(x=>Number(x.id)===Number(id));if(!p)return;$("pfName").value=p.product_name;$("pfFlavor").value=p.flavor;$("pfPieces").value=p.pieces_per_carton;$("pfPrice").value=p.sale_price_per_piece;editingId=id;$("moduleFormTitle").textContent="পণ্য Edit করুন";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
+  window.deleteProduct=async id=>{const p=cache.find(x=>Number(x.id)===Number(id));if(!p||!confirm(`“${p.product_name} / ${p.flavor}” পণ্যটি নিষ্ক্রিয় করবেন?`))return;try{const {error}=await db.from("products").update({is_active:false}).eq("id",id);if(error)throw error;setMsg("পণ্যটি নিষ্ক্রিয় হয়েছে। পণ্যের পুরোনো রেকর্ড মুছে ফেলা হয়নি।","success");await loadList()}catch(e){setMsg("নিষ্ক্রিয় করা যায়নি: "+e.message,"error")}};
+  window.editStock=async id=>{const r=cache.find(x=>Number(x.id)===Number(id));if(!r)return;const p=productCache.find(x=>Number(x.id)===Number(r.product_id));$("sfDate").value=String(r.movement_date).slice(0,10);$("sfProduct").value=r.product_id;$("sfType").value=r.movement_type;$("sfCartons").value=p?.pieces_per_carton?Math.floor(r.quantity_pieces/p.pieces_per_carton):0;$("sfLoose").value=p?.pieces_per_carton?r.quantity_pieces%p.pieces_per_carton:r.quantity_pieces;$("sfNotes").value=r.notes||"";editingId=id;$("moduleFormTitle").textContent="স্টক এন্ট্রি Edit করুন";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
+  window.deleteStock=async id=>{if(!confirm("এই স্টক এন্ট্রি স্থায়ীভাবে Delete করবেন? এই কাজ ফিরিয়ে আনা যাবে না।"))return;try{const {error}=await db.from("stock_movements").delete().eq("id",id);if(error)throw error;setMsg("স্টক এন্ট্রি Delete হয়েছে।","success");await loadList()}catch(e){setMsg("Delete করা যায়নি: "+e.message,"error")}};
+  $("moduleSearch").addEventListener("input",()=>loadList().catch(e=>setMsg(e.message,"error")));
+  if(isProducts)$("productStatus").addEventListener("change",()=>loadList().catch(e=>setMsg(e.message,"error")));else $("stockSearchDate").addEventListener("change",()=>loadList().catch(e=>setMsg(e.message,"error")));
+  $("moduleForm").addEventListener("submit",async e=>{
+   e.preventDefault();try{
+    if(isProducts){
+     const payload={product_name:$("pfName").value.trim(),flavor:$("pfFlavor").value.trim(),pieces_per_carton:Number($("pfPieces").value),sale_price_per_piece:Number($("pfPrice").value)};
+     if(!payload.product_name||!payload.flavor||payload.pieces_per_carton<1||payload.sale_price_per_piece<0)throw new Error("সব তথ্য সঠিকভাবে দিন।");
+     let q=editingId?db.from("products").update(payload).eq("id",editingId):db.from("products").insert(payload);
+     const {error}=await q;if(error)throw error;setMsg(editingId?"পণ্য আপডেট হয়েছে।":"নতুন পণ্য সংরক্ষণ হয়েছে।","success");
+    }else{
+     const p=productCache.find(x=>String(x.id)===$("sfProduct").value);if(!p)throw new Error("পণ্য বাছুন।");
+     const cartons=Number($("sfCartons").value||0),loose=Number($("sfLoose").value||0);
+     if(cartons<0||loose<0||(!cartons&&!loose))throw new Error("কার্টন বা পিসের পরিমাণ দিন।");
+     const payload={product_id:p.id,movement_type:$("sfType").value,quantity_pieces:Math.floor(cartons)*Number(p.pieces_per_carton)+Math.floor(loose),movement_date:$("sfDate").value||today(),notes:$("sfNotes").value.trim()||null};
+     const {error}=await (editingId?db.from("stock_movements").update(payload).eq("id",editingId):db.from("stock_movements").insert(payload));if(error)throw error;
+     setMsg(editingId?"স্টক এন্ট্রি আপডেট হয়েছে।":"স্টক এন্ট্রি সংরক্ষণ হয়েছে।","success");
+    }
+    resetForm();await loadProducts();await loadList();
+   }catch(err){setMsg("সংরক্ষণ হয়নি: "+err.message,"error")}
+  });
+  (async()=>{try{await loadProducts();await loadList()}catch(e){$("moduleList").textContent="তথ্য লোড হয়নি: "+e.message;setMsg(e.message,"error")}})();
+  return;
+ }
+
  if(key==="search"){
   pageShell(`<section class="panel"><h3>সার্চ</h3><p>${esc(intro[key])}</p><div class="form-grid"><div><label>দোকানের নাম</label><input id="searchStore" placeholder="দোকানের নাম লিখুন"></div><div><label>তারিখ</label><input id="searchDate" type="date" value="${today()}"></div><div><button class="primary" id="runSearch">খুঁজুন</button></div></div><div id="searchResults" class="message">দোকানের নাম অথবা তারিখ দিয়ে খুঁজুন।</div></section>`);
   $("runSearch").addEventListener("click",async()=>{try{const term=$("searchStore").value.trim();let q=db.from("daily_shop_entries").select("entry_date,store_id,vehicle_id,sales_amount,today_collection,old_due_collection,notes").order("entry_date",{ascending:false}).limit(200);if($("searchDate").value)q=q.eq("entry_date",$("searchDate").value);const {data,error}=await q;if(error)throw error;const sm=new Map(stores.map(s=>[String(s.id),s.store_name]));const vm=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)]));const rows=(data||[]).filter(r=>!term||(sm.get(String(r.store_id))||"").toLowerCase().includes(term.toLowerCase()));$("searchResults").innerHTML=`<div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>দোকান</th><th>ড্রাইভার</th><th>বিক্রি</th><th>আজকের আদায়</th><th>পুরনো বাকি আদায়</th><th>নোট</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.entry_date)}</td><td>${esc(sm.get(String(r.store_id))||"—")}</td><td>${esc(vm.get(String(r.vehicle_id))||"—")}</td><td>${money(r.sales_amount)}</td><td>${money(r.today_collection)}</td><td>${money(r.old_due_collection)}</td><td>${esc(r.notes||"")}</td></tr>`).join("")||'<tr><td colspan="7">কোনো তথ্য পাওয়া যায়নি।</td></tr>'}</tbody></table></div>`}catch(e){$("searchResults").textContent="সার্চ করা যায়নি: "+e.message}});
