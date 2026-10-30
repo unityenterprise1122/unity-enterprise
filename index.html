@@ -76,11 +76,63 @@ function vehicleOptions(selected=""){return `<option value="">ড্রাইভ
 function storeOptions(){return stores.map(s=>`<option value="${s.id}">${esc(s.store_name)}${s.owner_name?" — "+esc(s.owner_name):""}</option>`).join("")}
 async function navigate(key){currentPage=key;const labels={home:"ড্যাশবোর্ড",stores:"দোকান",daily:"ড্রাইভারের দৈনিক হিসাব",reports:"দৈনিক/মাসিক রিপোর্ট",settlement:"ড্রাইভারের ক্যাশ সেটেলমেন্ট",products:"পণ্য",stock:"গোডাউন স্টক",vehicles:"গাড়ি/ড্রাইভার",expenses:"খরচ",partners:"অংশীদার"};title.textContent=labels[key]||"হিসাব";document.querySelectorAll("#menu button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===key));try{await loadBaseData();if(key==="home")await renderHome();else if(key==="stores")await renderStores();else if(key==="daily")await renderDaily();else if(key==="reports")await renderReports();else if(key==="settlement")await renderSettlement();else if(key==="vehicles")renderVehicles();else renderSimple(key);setStatus("Supabase সংযোগ সফল।","success")}catch(e){pageShell(`<section class="panel"><div class="message error">${esc(e.message)}</div><p>Supabase টেবিল/কলামের নাম ও RLS অনুমতি যাচাই করুন।</p></section>`);setStatus("ডেটা লোডে সমস্যা: "+e.message,"error");console.error(e)}}
 async function renderHome(){
- const {data,error}=await db.from("daily_shop_entries").select("entry_date,sales_amount,today_collection,old_due_collection");
- if(error)throw error;
- const rows=data||[],t=today(),todayRows=rows.filter(r=>r.entry_date===t),month=t.slice(0,7),monthRows=rows.filter(r=>r.entry_date?.startsWith(month));
- const due=stores.reduce((sum,s)=>sum+num(s.opening_balance),0)+rows.reduce((sum,r)=>sum+num(r.sales_amount)-num(r.today_collection)-num(r.old_due_collection),0);
- pageShell(`<div class="cards"><div class="card"><p>সক্রিয় দোকান</p><strong>${stores.length}</strong></div><div class="card"><p>আজকের বিক্রি</p><strong>${money(todayRows.reduce((a,r)=>a+num(r.sales_amount),0))}</strong></div><div class="card"><p>আজ মোট আদায়</p><strong>${money(todayRows.reduce((a,r)=>a+num(r.today_collection)+num(r.old_due_collection),0))}</strong></div><div class="card"><p>দোকানে মোট বাকি (আনুমানিক)</p><strong>${money(due)}</strong></div></div><section class="panel"><h3>দ্রুত কাজ</h3><p>ড্রাইভারের দৈনিক হিসাব খুলে তারিখ ও ড্রাইভার নির্বাচন করে দোকানভিত্তিক বিক্রি ও টাকা আদায় লিখুন।</p><button class="primary" onclick="window.goPage('daily')">দৈনিক হিসাব শুরু করুন</button><p class="muted small">নোট: বাকি হিসাবের মধ্যে দোকানের প্রারম্ভিক বাকি ও সংরক্ষিত দৈনিক এন্ট্রি ধরা হয়েছে।</p></section>`);
+ const todayDate=t(), month=todayDate.slice(0,7);
+ const [{data:dailyData,error:dailyError},{data:allStoreRows,error:storeError}] = await Promise.all([
+   db.from("daily_shop_entries").select("entry_date,store_id,vehicle_id,sales_amount,today_collection,old_due_collection"),
+   db.from("stores").select("id,opening_balance,is_active")
+ ]);
+ if(dailyError) throw new Error("দৈনিক হিসাব লোড হয়নি: "+dailyError.message);
+ if(storeError) throw new Error("দোকানের হিসাব লোড হয়নি: "+storeError.message);
+
+ const rows=dailyData||[];
+ const activeStores=(allStoreRows||[]).filter(s=>s.is_active!==false);
+ const todays=rows.filter(r=>r.entry_date===todayDate);
+ const monthRows=rows.filter(r=>String(r.entry_date||"").startsWith(month));
+ const salesToday=todays.reduce((a,r)=>a+num(r.sales_amount),0);
+ const collectedToday=todays.reduce((a,r)=>a+num(r.today_collection)+num(r.old_due_collection),0);
+ const newDueToday=todays.reduce((a,r)=>a+num(r.sales_amount)-num(r.today_collection),0);
+ const totalDue=activeStores.reduce((a,s)=>a+num(s.opening_balance),0)+rows.reduce((a,r)=>a+num(r.sales_amount)-num(r.today_collection)-num(r.old_due_collection),0);
+ const salesMonth=monthRows.reduce((a,r)=>a+num(r.sales_amount),0);
+ const collectedMonth=monthRows.reduce((a,r)=>a+num(r.today_collection)+num(r.old_due_collection),0);
+ const incompleteToday=todays.length===0;
+ const unsupported="এই হিসাবের ডেটাবেস সংযোগ যাচাই/যুক্ত করা বাকি";
+ const card=(label,value,sub="")=>`<div class="card"><p>${esc(label)}</p><strong>${value}</strong>${sub?`<div class="small muted" style="margin-top:7px">${esc(sub)}</div>`:""}</div>`;
+ pageShell(`
+ <section class="panel">
+   <div class="actions" style="justify-content:space-between;align-items:center">
+    <div><h3 style="margin:0">ব্যবসার সার্বিক অবস্থা</h3><p class="muted small" style="margin:5px 0 0">তারিখ: ${esc(todayDate)} · মাস: ${esc(month)}</p></div>
+    <button class="secondary no-print" onclick="window.goPage('reports')">রিপোর্ট দেখুন</button>
+   </div>
+ </section>
+ <div class="cards">
+  ${card("আজকের মোট বিক্রি",money(salesToday),`এই মাসে: ${money(salesMonth)}`)}
+  ${card("আজ মোট আদায়",money(collectedToday),`এই মাসে: ${money(collectedMonth)}`)}
+  ${card("আজকের নতুন বাকি (হিসাবি)",money(newDueToday),"বিক্রি − আজকের বিক্রির আদায়")}
+  ${card("দোকানের কাছে মোট পাওনা",money(totalDue),"শুরুর বাকি ও দৈনিক এন্ট্রি থেকে হিসাব")}
+  ${card("সক্রিয় দোকান",String(activeStores.length))}
+  ${card("আজকের হিসাব",incompleteToday?"এখনো এন্ট্রি নেই":"এন্ট্রি পাওয়া গেছে",incompleteToday?"আজকের দৈনিক হিসাব অসম্পূর্ণ হতে পারে":"এন্ট্রি আছে; সব দোকান/গাড়ি সম্পূর্ণ কি না যাচাই করুন")}
+ </div>
+ <section class="panel">
+  <h3>অন্যান্য গুরুত্বপূর্ণ হিসাব</h3>
+  <div class="cards">
+   ${card("অফিসের নগদ", "যাচাই বাকি", unsupported)}
+   ${card("কোম্পানির ইনসেনটিভ", "যাচাই বাকি", unsupported)}
+   ${card("আজ / মাসের খরচ", "যাচাই বাকি", unsupported)}
+   ${card("স্টক ও নষ্ট পণ্য", "যাচাই বাকি", unsupported)}
+   ${card("লাভ-ক্ষতি", "যাচাই বাকি", "ক্রয়মূল্য, বিক্রি ও খরচের নির্ভরযোগ্য ডেটা সংযুক্ত করা বাকি")}
+   ${card("মালিকের কাছে নিরাপত্তার টাকা", "যাচাই বাকি", unsupported)}
+  </div>
+  <p class="small muted">গুরুত্বপূর্ণ: যেসব হিসাবের নির্ভরযোগ্য টেবিল/কলাম এখনো যাচাই করা হয়নি, সেগুলোতে ভুল সংখ্যা দেখানোর বদলে “যাচাই বাকি” দেখানো হচ্ছে। ডেটাবেস যাচাইয়ের পর সেগুলো সংযুক্ত করা হবে।</p>
+ </section>
+ <section class="panel">
+  <h3>দ্রুত কাজ</h3>
+  <div class="actions">
+   <button class="primary" onclick="window.goPage('daily')">দৈনিক হিসাব লিখুন</button>
+   <button class="secondary" onclick="window.goPage('settlement')">ক্যাশ সেটেলমেন্ট</button>
+   <button class="secondary" onclick="window.goPage('stores')">দোকানের হিসাব</button>
+   <button class="secondary" onclick="window.goPage('reports')">রিপোর্ট</button>
+  </div>
+ </section>`);
 }
 async function renderStores(){
  const {data,error}=await db.from("stores").select("id,store_name,owner_name,phone,address,opening_balance,is_active").order("store_name");
