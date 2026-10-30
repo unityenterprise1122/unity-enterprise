@@ -423,6 +423,66 @@ function renderSimple(key){
   return;
  }
 
+
+ if(key==="ownerfund"){
+  pageShell(`<section class="panel"><h3>মালিকের কাছে রাখা টাকা</h3>
+   <p>অংশীদার মেনুর সক্রিয় তালিকা থেকেই নাম আসবে। এখানে টাকা রাখলে অফিস ক্যাশ কমবে, ফেরত এলে অফিস ক্যাশ বাড়বে—এটি ব্যবসার খরচ নয়।</p>
+   <div class="form-grid">
+    <div><label>মালিক / অংশীদার</label><select id="ofPartner" required><option value="">নাম লোড হচ্ছে…</option></select></div>
+    <div><label>তারিখ</label><input id="ofDate" type="date" value="${today()}" required></div>
+    <div><label>লেনদেনের ধরন</label><select id="ofType"><option value="taken">মালিকের কাছে টাকা রাখা</option><option value="returned">মালিকের কাছ থেকে টাকা ফেরত</option></select></div>
+    <div><label>পরিমাণ (৳)</label><input id="ofAmount" type="number" min="0.01" step="0.01" required></div>
+    <div><label>নোট</label><input id="ofNotes"></div>
+   </div>
+   <p class="actions"><button class="primary" id="ofSave">সংরক্ষণ করুন</button></p>
+   <div id="ofMessage" class="message">অংশীদারের নাম লোড হচ্ছে…</div>
+  </section>
+  <section class="panel"><h3>প্রত্যেক মালিকের হিসাব</h3><div id="ofBalances" class="message">লোড হচ্ছে…</div></section>
+  <section class="panel"><h3>লেনদেনের তালিকা</h3><div id="ofHistory" class="message">লোড হচ্ছে…</div></section>`);
+  const say=(s,c="message")=>msg("ofMessage",s,c);
+  let partnersList=[];
+  const loadOwnerFund=async()=>{
+   const {data:ps,error:pe}=await db.from("partners").select("id,partner_name,is_active").order("partner_name");
+   if(pe)throw pe;
+   partnersList=(ps||[]).filter(p=>p.is_active!==false);
+   $("ofPartner").innerHTML='<option value="">অংশীদার বাছুন</option>'+partnersList.map(p=>`<option value="${p.id}">${esc(p.partner_name)}</option>`).join("");
+   if(!partnersList.length)$("ofPartner").innerHTML='<option value="">আগে অংশীদার মেনুতে নাম যোগ করুন</option>';
+   const {data:ledger,error}=await db.from("partner_handover_ledger").select("id,partner_id,transaction_date,transaction_type,amount,notes").order("transaction_date",{ascending:false}).limit(1000);
+   if(error)throw error;
+   const totals=new Map(partnersList.map(p=>[String(p.id),{taken:0,returned:0}]));
+   (ledger||[]).forEach(r=>{const t=totals.get(String(r.partner_id));if(t){if(r.transaction_type==="taken")t.taken+=Number(r.amount||0);else if(r.transaction_type==="returned")t.returned+=Number(r.amount||0);}});
+   $("ofBalances").innerHTML=`<div class="table-wrap"><table><thead><tr><th>মালিক</th><th>মোট রাখা</th><th>মোট ফেরত</th><th>বর্তমানে কাছে আছে</th></tr></thead><tbody>${partnersList.map(p=>{const t=totals.get(String(p.id));return `<tr><td>${esc(p.partner_name)}</td><td>${money(t.taken)}</td><td>${money(t.returned)}</td><td><b>${money(t.taken-t.returned)}</b></td></tr>`}).join("")||'<tr><td colspan="4">অংশীদার তালিকা খালি। আগে অংশীদার যোগ করুন।</td></tr>'}</tbody></table></div>`;
+   const pm=new Map((ps||[]).map(p=>[String(p.id),p.partner_name]));
+   $("ofHistory").innerHTML=`<div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>মালিক</th><th>লেনদেন</th><th>পরিমাণ</th><th>নোট</th></tr></thead><tbody>${(ledger||[]).map(r=>`<tr><td>${esc(r.transaction_date)}</td><td>${esc(pm.get(String(r.partner_id))||"—")}</td><td>${r.transaction_type==="taken"?"টাকা রাখা":"টাকা ফেরত"}</td><td>${money(r.amount)}</td><td>${esc(r.notes||"")}</td></tr>`).join("")||'<tr><td colspan="5">এখনো কোনো লেনদেন নেই।</td></tr>'}</tbody></table></div>`;
+  };
+  $("ofSave").addEventListener("click",async()=>{
+   try{
+    const partnerId=$("ofPartner").value, amount=Number($("ofAmount").value||0), type=$("ofType").value;
+    if(!partnerId)throw new Error("অংশীদার নির্বাচন করুন।");
+    if(!(amount>0))throw new Error("শূন্যের বেশি টাকার পরিমাণ দিন।");
+    const partner=partnersList.find(p=>String(p.id)===String(partnerId));
+    if(!partner)throw new Error("নির্বাচিত অংশীদার তালিকায় নেই।");
+    if(type==="returned"){
+     const {data:prior,error}=await db.from("partner_handover_ledger").select("transaction_type,amount").eq("partner_id",partnerId);
+     if(error)throw error;
+     const balance=(prior||[]).reduce((s,r)=>s+(r.transaction_type==="taken"?Number(r.amount):r.transaction_type==="returned"?-Number(r.amount):0),0);
+     if(amount>balance)throw new Error("ফেরতের পরিমাণ বর্তমান বকেয়া "+money(balance)+" টাকার বেশি হতে পারবে না।");
+    }
+    const date=$("ofDate").value||today(), note=$("ofNotes").value.trim()||null;
+    const {error:le}=await db.from("partner_handover_ledger").insert({partner_id:partnerId,transaction_date:date,transaction_type:type,amount,notes:note});
+    if(le)throw le;
+    const cashType=type==="taken"?"partner_handover":"owner_handover_return";
+    const {error:ce}=await db.from("office_cash_transactions").insert({transaction_date:date,transaction_type:cashType,amount,partner_id:partnerId,source_table:"partner_handover_ledger",notes:note|| (type==="taken"?"মালিকের কাছে টাকা রাখা":"মালিকের কাছ থেকে টাকা ফেরত")});
+    if(ce){say("অংশীদারের লেজারে সংরক্ষণ হয়েছে, কিন্তু অফিস ক্যাশে এন্ট্রি হয়নি: "+ce.message,"error");await loadOwnerFund();return;}
+    $("ofAmount").value="";$("ofNotes").value="";
+    say("লেনদেন এবং অফিস ক্যাশের এন্ট্রি সংরক্ষণ হয়েছে।","success");
+    await loadOwnerFund();
+   }catch(e){say("সংরক্ষণ হয়নি: "+e.message,"error");}
+  });
+  loadOwnerFund().catch(e=>say("তথ্য লোড হয়নি: "+e.message,"error"));
+  return;
+ }
+
  if(key==="search"){
   pageShell(`<section class="panel"><h3>সার্চ</h3><p>${esc(intro[key])}</p><div class="form-grid"><div><label>দোকানের নাম</label><input id="searchStore" placeholder="দোকানের নাম লিখুন"></div><div><label>তারিখ</label><input id="searchDate" type="date" value="${today()}"></div><div><button class="primary" id="runSearch">খুঁজুন</button></div></div><div id="searchResults" class="message">দোকানের নাম অথবা তারিখ দিয়ে খুঁজুন।</div></section>`);
   $("runSearch").addEventListener("click",async()=>{try{const term=$("searchStore").value.trim();let q=db.from("daily_shop_entries").select("entry_date,store_id,vehicle_id,sales_amount,today_collection,old_due_collection,notes").order("entry_date",{ascending:false}).limit(200);if($("searchDate").value)q=q.eq("entry_date",$("searchDate").value);const {data,error}=await q;if(error)throw error;const sm=new Map(stores.map(s=>[String(s.id),s.store_name]));const vm=new Map(vehicles.map(v=>[String(v.id),vehicleLabel(v)]));const rows=(data||[]).filter(r=>!term||(sm.get(String(r.store_id))||"").toLowerCase().includes(term.toLowerCase()));$("searchResults").innerHTML=`<div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>দোকান</th><th>ড্রাইভার</th><th>বিক্রি</th><th>আজকের আদায়</th><th>পুরনো বাকি আদায়</th><th>নোট</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.entry_date)}</td><td>${esc(sm.get(String(r.store_id))||"—")}</td><td>${esc(vm.get(String(r.vehicle_id))||"—")}</td><td>${money(r.sales_amount)}</td><td>${money(r.today_collection)}</td><td>${money(r.old_due_collection)}</td><td>${esc(r.notes||"")}</td></tr>`).join("")||'<tr><td colspan="7">কোনো তথ্য পাওয়া যায়নি।</td></tr>'}</tbody></table></div>`}catch(e){$("searchResults").textContent="সার্চ করা যায়নি: "+e.message}});
@@ -431,7 +491,7 @@ function renderSimple(key){
  const rows=fields[key];
  if(rows){
   const controls=rows.map((f,i)=>{const id="modf"+i;let input=f[1].startsWith("select:")?`<select id="${id}">${f[1].slice(7).split(",").map(x=>`<option>${esc(x)}</option>`).join("")}</select>`:`<input id="${id}" type="${f[1]}" ${f[1]==="number"?'min="0" step="0.01"':''} ${f[1]==="date"?`value="${today()}"`:""}>`;return `<div><label>${esc(f[0])}</label>${input}</div>`}).join("");
-  pageShell(`<section class="panel"><h3>${esc(names[key])}</h3><p>${esc(intro[key])}</p><div class="message warning"><b>নোট:</b> পণ্য, স্টক মুভমেন্ট, খরচ ও অংশীদার লেনদেনের জন্য বিদ্যমান টেবিলে সংরক্ষণ চালু করা হয়েছে। অফিস ক্যাশ, ইনসেনটিভ, মালিকের কাছে রাখা টাকা এবং কর্মচারীর আলাদা লেজারের জন্য প্রয়োজনীয় টেবিল/কলাম যাচাই না হওয়ায় সেগুলো এখনো সংরক্ষণ করে না। আগে Supabase-এ টেবিলের নাম ও অনুমতি যাচাই করুন।</div><form id="moduleForm"><div class="form-grid">${controls}</div><p class="actions"><button class="primary" type="submit">সংরক্ষণ করুন</button><button type="button" class="secondary" onclick="window.print()">প্রিন্ট / PDF</button></p></form><div id="moduleMessage" class="message">ডেটাবেসের কাঠামো মিলিয়ে নেওয়ার পর এই মডিউলের সংরক্ষণ চালু করা হবে।</div></section><section class="panel"><h3>${esc(names[key])} — হিসাবের নিয়ম</h3><p>${esc(intro[key])}</p><p class="small muted">এখনকার চালু ফিচার: দোকান, দৈনিক দোকানভিত্তিক বিক্রি/আদায়, ড্রাইভার সেটেলমেন্ট ও রিপোর্ট। এই মডিউলগুলোর বাস্তব ডেটাবেস সংযোগ পরবর্তী যাচাইয়ের পর যুক্ত হবে।</p></section>`);
+  pageShell(`<section class="panel"><h3>${esc(names[key])}</h3><p>${esc(intro[key])}</p><div class="message warning"><b>নোট:</b> পণ্য, স্টক মুভমেন্ট, খরচ ও অংশীদার লেনদেনের জন্য বিদ্যমান টেবিলে সংরক্ষণ চালু করা হয়েছে। অফিস ক্যাশ, ইনসেনটিভ এবং কর্মচারীর পূর্ণ লেজার পরবর্তী ধাপে যুক্ত হবে। মালিকের কাছে রাখা টাকা আলাদা লেজারে সংরক্ষণ করা হয়। আগে Supabase-এ টেবিলের নাম ও অনুমতি যাচাই করুন।</div><form id="moduleForm"><div class="form-grid">${controls}</div><p class="actions"><button class="primary" type="submit">সংরক্ষণ করুন</button><button type="button" class="secondary" onclick="window.print()">প্রিন্ট / PDF</button></p></form><div id="moduleMessage" class="message">এই মডিউলের ডেটাবেস সংযোগ যাচাই সাপেক্ষে ব্যবহার করুন।</div></section><section class="panel"><h3>${esc(names[key])} — হিসাবের নিয়ম</h3><p>${esc(intro[key])}</p><p class="small muted">এখনকার চালু ফিচার: দোকান, দৈনিক দোকানভিত্তিক বিক্রি/আদায়, ড্রাইভার সেটেলমেন্ট ও রিপোর্ট। এই মডিউলগুলোর বাস্তব ডেটাবেস সংযোগ পরবর্তী যাচাইয়ের পর যুক্ত হবে।</p></section>`);
   if(key==="stock"){
    (async()=>{try{
     const {data,error}=await db.from("products").select("product_name,flavor").order("product_name");
