@@ -76,7 +76,7 @@ function vehicleOptions(selected=""){return `<option value="">ড্রাইভ
 function storeOptions(){return stores.map(s=>`<option value="${s.id}">${esc(s.store_name)}${s.owner_name?" — "+esc(s.owner_name):""}</option>`).join("")}
 async function navigate(key){currentPage=key;const labels={home:"ড্যাশবোর্ড",stores:"দোকান",daily:"ড্রাইভারের দৈনিক হিসাব",reports:"দৈনিক/মাসিক রিপোর্ট",settlement:"ড্রাইভারের ক্যাশ সেটেলমেন্ট",products:"পণ্য",stock:"গোডাউন স্টক",vehicles:"গাড়ি/ড্রাইভার",expenses:"খরচ",partners:"অংশীদার"};title.textContent=labels[key]||"হিসাব";document.querySelectorAll("#menu button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===key));try{await loadBaseData();if(key==="home")await renderHome();else if(key==="stores")await renderStores();else if(key==="daily")await renderDaily();else if(key==="reports")await renderReports();else if(key==="settlement")await renderSettlement();else if(key==="vehicles")renderVehicles();else renderSimple(key);setStatus("Supabase সংযোগ সফল।","success")}catch(e){pageShell(`<section class="panel"><div class="message error">${esc(e.message)}</div><p>Supabase টেবিল/কলামের নাম ও RLS অনুমতি যাচাই করুন।</p></section>`);setStatus("ডেটা লোডে সমস্যা: "+e.message,"error");console.error(e)}}
 async function renderHome(){
- const todayDate=t(), month=todayDate.slice(0,7);
+ const todayDate=today(), month=todayDate.slice(0,7);
  const [{data:dailyData,error:dailyError},{data:allStoreRows,error:storeError}] = await Promise.all([
    db.from("daily_shop_entries").select("entry_date,store_id,vehicle_id,sales_amount,today_collection,old_due_collection"),
    db.from("stores").select("id,opening_balance,is_active")
